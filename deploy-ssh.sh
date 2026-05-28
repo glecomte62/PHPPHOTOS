@@ -13,6 +13,7 @@ set -e
 
 # Configuration O2switch
 SSH_HOST="legu7203.odns.fr"
+SSH_PORT="7822"
 SSH_USER="legu7203"
 SSH_KEY="~/.ssh/id_ed25519"
 
@@ -25,7 +26,7 @@ LOCAL_DIR="$(cd "$(dirname "$0")" && pwd)/app"
 # Multiplexage SSH
 SOCKET_DIR="$HOME/.ssh/sockets"
 SOCKET_PATH="$SOCKET_DIR/${SSH_USER}@${SSH_HOST}"
-SSH_OPTS="-o ControlMaster=auto -o ControlPath=$SOCKET_PATH -o ControlPersist=300 -o ServerAliveInterval=30 -o ServerAliveCountMax=5"
+SSH_OPTS="-p $SSH_PORT -o ControlMaster=auto -o ControlPath=$SOCKET_PATH -o ControlPersist=300 -o ServerAliveInterval=30 -o ServerAliveCountMax=5"
 
 # Couleurs
 RED='\033[0;31m'
