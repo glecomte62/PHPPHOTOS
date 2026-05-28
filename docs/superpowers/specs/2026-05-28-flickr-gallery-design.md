@@ -33,9 +33,9 @@ app/
 ### Fichier `.env`
 
 ```
-FLICKR_API_KEY=18caedefb328eba11e90fc70a01f65ce
-FLICKR_SECRET=c67730ea9f6f2d5d
-FLICKR_USER_ID=196274855@N02
+FLICKR_API_KEY=<your_api_key>
+FLICKR_SECRET=<your_secret>
+FLICKR_USER_ID=<your_user_id>
 ```
 
 Le `.env` est exclu du déploiement rsync (ajouté dans le `--exclude` de `deploy-ssh.sh`). La clé API n'est jamais exposée au client.

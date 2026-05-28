@@ -39,9 +39,9 @@
 - [ ] **Step 1 : Créer `app/.env`**
 
 ```
-FLICKR_API_KEY=18caedefb328eba11e90fc70a01f65ce
-FLICKR_SECRET=c67730ea9f6f2d5d
-FLICKR_USER_ID=196274855@N02
+FLICKR_API_KEY=<your_api_key>
+FLICKR_SECRET=<your_secret>
+FLICKR_USER_ID=<your_user_id>
 ```
 
 - [ ] **Step 2 : Créer `app/.env.example`**
@@ -1120,9 +1120,9 @@ Puis sur le serveur :
 
 ```bash
 cat > /home/legu7203/phpphotos/.env << 'EOF'
-FLICKR_API_KEY=18caedefb328eba11e90fc70a01f65ce
-FLICKR_SECRET=c67730ea9f6f2d5d
-FLICKR_USER_ID=196274855@N02
+FLICKR_API_KEY=<your_api_key>
+FLICKR_SECRET=<your_secret>
+FLICKR_USER_ID=<your_user_id>
 EOF
 chmod 600 /home/legu7203/phpphotos/.env
 ```
