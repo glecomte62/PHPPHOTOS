@@ -19,8 +19,9 @@
         overlay.querySelector('.lightbox-btn-prev').addEventListener('click', prev);
         overlay.querySelector('.lightbox-btn-next').addEventListener('click', next);
 
+        var lightboxMain = overlay.querySelector('.lightbox-main');
         overlay.addEventListener('click', function (e) {
-            if (e.target === overlay || e.target === overlay.querySelector('.lightbox-main')) {
+            if (e.target === overlay || e.target === lightboxMain) {
                 close();
             }
         });
@@ -42,7 +43,7 @@
                 title: el.dataset.title   || '',
                 desc:  el.dataset.desc    || '',
                 date:  el.dataset.date    || '',
-                tags:  el.dataset.tags    ? el.dataset.tags.split(',').filter(Boolean) : [],
+                tags:  el.dataset.tags    ? JSON.parse(el.dataset.tags) : [],
             };
         });
     }

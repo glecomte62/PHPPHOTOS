@@ -15,16 +15,9 @@ $photos = [];
 $galleryTitle = 'Galerie';
 
 try {
-    $photos = $api->getPhotos($photosetId);
-
-    // Récupérer le titre de la galerie depuis les photosets
-    $photosets = $api->getPhotosets();
-    foreach ($photosets as $ps) {
-        if ($ps['id'] === $photosetId) {
-            $galleryTitle = $ps['title'];
-            break;
-        }
-    }
+    $result       = $api->getPhotos($photosetId);
+    $photos       = $result['photos'];
+    $galleryTitle = $result['title'] ?: $galleryTitle;
 } catch (RuntimeException $e) {
     $error = $e->getMessage();
 }
@@ -78,7 +71,7 @@ try {
             data-title="<?= htmlspecialchars($photo['title']) ?>"
             data-desc="<?= htmlspecialchars($photo['description']) ?>"
             data-date="<?= htmlspecialchars($photo['date_taken']) ?>"
-            data-tags="<?= htmlspecialchars(implode(',', $photo['tags'])) ?>"
+            data-tags="<?= htmlspecialchars(json_encode(array_values($photo['tags']))) ?>"
         >
             <img
                 src="<?= htmlspecialchars($photo['url_large']) ?>"

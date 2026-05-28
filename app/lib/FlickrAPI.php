@@ -33,7 +33,9 @@ class FlickrAPI
         foreach ($data['photosets']['photoset'] ?? [] as $ps) {
             $coverUrl = $ps['primary_photo_extras']['url_l']
                      ?? $ps['primary_photo_extras']['url_m']
-                     ?? $this->buildPhotoUrl($ps['farm'], $ps['server'], $ps['primary'], $ps['secret'], 'z');
+                     ?? (isset($ps['farm'], $ps['server'], $ps['primary'], $ps['secret'])
+                         ? $this->buildPhotoUrl($ps['farm'], $ps['server'], $ps['primary'], $ps['secret'], 'z')
+                         : '');
 
             $photosets[] = [
                 'id'          => $ps['id'],
@@ -48,8 +50,9 @@ class FlickrAPI
     }
 
     /**
-     * Retourne les photos d'une galerie.
-     * Chaque élément : ['id', 'title', 'description', 'url_thumb', 'url_large', 'date_taken', 'tags']
+     * Retourne les photos et le titre d'une galerie.
+     * Retourne ['title' => string, 'photos' => array]
+     * Chaque photo : ['id', 'title', 'description', 'url_thumb', 'url_large', 'date_taken', 'tags']
      */
     public function getPhotos(string $photosetId): array
     {
@@ -78,7 +81,10 @@ class FlickrAPI
             ];
         }
 
-        return $photos;
+        return [
+            'title'  => $data['photoset']['title']['_content'] ?? '',
+            'photos' => $photos,
+        ];
     }
 
     private function buildPhotoUrl(string $farm, string $server, string $id, string $secret, string $size): string
@@ -95,6 +101,10 @@ class FlickrAPI
         $url = $this->baseUrl . '?' . http_build_query($params);
 
         $ch = curl_init($url);
+        if ($ch === false) {
+            throw new RuntimeException('cURL initialization failed — extension may not be available');
+        }
+
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => 10,
@@ -102,12 +112,13 @@ class FlickrAPI
             CURLOPT_SSL_VERIFYPEER => true,
         ]);
 
-        $response = curl_exec($ch);
-        $error    = curl_error($ch);
+        $response  = curl_exec($ch);
+        $curlError = curl_error($ch);
+        $curlErrno = curl_errno($ch);
         curl_close($ch);
 
-        if ($error) {
-            throw new RuntimeException('cURL error: ' . $error);
+        if ($response === false) {
+            throw new RuntimeException('cURL error (' . $curlErrno . '): ' . ($curlError ?: 'unknown'));
         }
 
         $decoded = json_decode($response, true);

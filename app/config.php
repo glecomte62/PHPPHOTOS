@@ -3,6 +3,7 @@
 $envFile = __DIR__ . '/.env';
 
 if (!file_exists($envFile)) {
+    http_response_code(500);
     die('<div style="font-family:monospace;color:#c00;padding:2rem">Erreur : fichier .env manquant. Copiez .env.example en .env et renseignez vos clés.</div>');
 }
 
@@ -20,5 +21,6 @@ define('FLICKR_USER_ID', $parsed['FLICKR_USER_ID'] ?? '');
 unset($parsed);
 
 if (empty(FLICKR_API_KEY) || empty(FLICKR_USER_ID)) {
+    http_response_code(500);
     die('<div style="font-family:monospace;color:#c00;padding:2rem">Erreur : FLICKR_API_KEY et FLICKR_USER_ID sont requis dans .env</div>');
 }
