@@ -1,0 +1,13 @@
+Options -Indexes
+RewriteEngine On
+
+# Bloquer l'accès direct au .env
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Rediriger les requêtes vers index.php si le fichier n'existe pas
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?path=$1 [QSA,L]

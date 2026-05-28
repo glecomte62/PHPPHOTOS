@@ -96,6 +96,7 @@ else
         -e "ssh -i $SSH_KEY $SSH_OPTS" \
         --exclude '.DS_Store' \
         --exclude '*.log' \
+        --exclude '.env' \
         "$LOCAL_DIR/" "$SSH_USER@$SSH_HOST:$REMOTE_DIR/"
     echo -e "${GREEN}✓ Synchronisation terminée${NC}"
 fi
