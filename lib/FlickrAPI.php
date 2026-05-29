@@ -125,6 +125,76 @@ class FlickrAPI
     }
 
     /**
+     * Retourne les infos de plusieurs photosets en parallèle via curl_multi.
+     * Retourne un tableau indexé par photoset id : ['id', 'title', 'description', 'photo_count', 'cover_url']
+     * Les IDs introuvables sont silencieusement ignorés.
+     *
+     * @param string[] $ids
+     * @return array<string, array>
+     */
+    public function getPhotosetsInfo(array $ids): array
+    {
+        if (empty($ids)) return [];
+
+        $mh      = curl_multi_init();
+        $handles = [];
+
+        foreach ($ids as $id) {
+            $params = [
+                'method'      => 'flickr.photosets.getInfo',
+                'photoset_id' => $id,
+                'user_id'     => $this->userId,
+                'api_key'     => $this->apiKey,
+                'format'      => 'json',
+                'nojsoncallback' => 1,
+            ];
+            $url = $this->baseUrl . '?' . http_build_query($params);
+            $ch  = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT        => 10,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_SSL_VERIFYPEER => true,
+            ]);
+            curl_multi_add_handle($mh, $ch);
+            $handles[$id] = $ch;
+        }
+
+        // Exécuter tous les handles en parallèle
+        do {
+            $status = curl_multi_exec($mh, $active);
+            if ($active) curl_multi_select($mh);
+        } while ($active && $status === CURLM_OK);
+
+        $results = [];
+        foreach ($handles as $id => $ch) {
+            $response = curl_multi_getcontent($ch);
+            curl_multi_remove_handle($mh, $ch);
+            curl_close($ch);
+
+            if (!$response) continue;
+            $data = json_decode($response, true);
+            if (!$data || ($data['stat'] ?? '') !== 'ok') continue;
+
+            $ps = $data['photoset'];
+            $coverUrl = isset($ps['farm'], $ps['server'], $ps['primary'], $ps['secret'])
+                ? $this->buildPhotoUrl($ps['farm'], $ps['server'], $ps['primary'], $ps['secret'], 'z')
+                : '';
+
+            $results[$id] = [
+                'id'          => $ps['id'],
+                'title'       => $ps['title']['_content'] ?? '',
+                'description' => $ps['description']['_content'] ?? '',
+                'photo_count' => (int)($ps['photos'] ?? 0),
+                'cover_url'   => $coverUrl,
+            ];
+        }
+
+        curl_multi_close($mh);
+        return $results;
+    }
+
+    /**
      * Retourne les photos et le titre d'une galerie.
      * Retourne ['title' => string, 'photos' => array]
      * Chaque photo : ['id', 'title', 'description', 'url_thumb', 'url_large', 'date_taken', 'tags']
