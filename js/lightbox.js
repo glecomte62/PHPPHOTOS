@@ -15,9 +15,12 @@
         overlay   = document.getElementById('lightbox-overlay');
         if (!overlay) return;
 
+        panel   = document.getElementById('lightbox-panel');
+        btnInfo = document.getElementById('lightbox-info-btn');
+        if (!panel || !btnInfo) return;
+
         imgWrap    = overlay.querySelector('.lightbox-img-wrap');
         img        = overlay.querySelector('.lightbox-img');
-        panel      = document.getElementById('lightbox-panel');
         panelTitle = panel.querySelector('.lightbox-panel-title');
         panelDate  = panel.querySelector('.lightbox-panel-date');
         tagsEl     = panel.querySelector('.lightbox-tags');
@@ -25,7 +28,6 @@
         mapEl      = document.getElementById('lightbox-map');
 
         btnClose = overlay.querySelector('.lightbox-close');
-        btnInfo  = document.getElementById('lightbox-info-btn');
         btnPrev  = overlay.querySelector('.lightbox-prev');
         btnNext  = overlay.querySelector('.lightbox-next');
 
@@ -42,18 +44,22 @@
             if (e.key === 'ArrowRight' && !zoomed) next();
         });
 
-        document.querySelectorAll('.photo-item').forEach(function (el, index) {
+        var items = document.querySelectorAll('.photo-item');
+        items.forEach(function (el, index) {
             el.addEventListener('click', function () { open(index); });
         });
 
-        photos = Array.from(document.querySelectorAll('.photo-item')).map(function (el) {
+        photos = Array.from(items).map(function (el) {
             return {
                 id:    el.dataset.id    || '',
                 large: el.dataset.large || '',
                 title: el.dataset.title || '',
                 desc:  el.dataset.desc  || '',
                 date:  el.dataset.date  || '',
-                tags:  el.dataset.tags ? JSON.parse(el.dataset.tags) : [],
+                tags: (function () {
+                    try { return el.dataset.tags ? JSON.parse(el.dataset.tags) : []; }
+                    catch (e) { return []; }
+                }()),
             };
         });
     }
@@ -177,16 +183,18 @@
 
     /* ---- EXIF + Carte ---- */
     function loadPhotoInfo(photoId, index) {
+        var capturedExifEl = exifEl;
+        var capturedMapEl  = mapEl;
         fetch('photo-info.php?id=' + encodeURIComponent(photoId))
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 if (current !== index) return; // navigation entre-temps
-                renderExif(data.exif || {});
-                renderMap(data.location || null);
+                renderExif(data.exif || {}, capturedExifEl);
+                renderMap(data.location || null, capturedMapEl);
                 infoLoaded[index] = true;
             })
             .catch(function () {
-                exifEl.innerHTML = '';
+                capturedExifEl.innerHTML = '';
             });
     }
 
@@ -217,8 +225,8 @@
         ['GPSAltitude',             'Altitude GPS'],
     ];
 
-    function renderExif(exif) {
-        exifEl.innerHTML = '';
+    function renderExif(exif, el) {
+        el.innerHTML = '';
         if (!Object.keys(exif).length) return;
 
         var rows = [];
@@ -252,16 +260,21 @@
             tr.appendChild(val);
             table.appendChild(tr);
         });
-        exifEl.appendChild(table);
+        el.appendChild(table);
     }
 
-    function renderMap(location) {
-        if (!location || !location.lat || !location.lng) {
-            mapEl.style.display = 'none';
+    function renderMap(location, el) {
+        if (typeof L === 'undefined') {
+            el.style.display = 'none';
             return;
         }
 
-        mapEl.style.display = 'block';
+        if (!location || !location.lat || !location.lng) {
+            el.style.display = 'none';
+            return;
+        }
+
+        el.style.display = 'block';
 
         if (!leafletMap) {
             leafletMap    = L.map('lightbox-map', { zoomControl: true, attributionControl: false });
@@ -277,7 +290,7 @@
 
     function formatDate(str) {
         if (!str) return '';
-        var d = new Date(str);
+        var d = new Date(str.replace(' ', 'T'));
         if (isNaN(d)) return str;
         return d.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
     }
