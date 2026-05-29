@@ -297,6 +297,47 @@ class FlickrAPI
         ];
     }
 
+    /**
+     * Retourne les photos géolocalisées de l'utilisateur (une page).
+     * Retourne ['photos' => [...], 'pages' => N]
+     * Chaque photo : ['id', 'title', 'lat', 'lng', 'url_thumb']
+     */
+    public function getGeoPhotos(int $page = 1): array
+    {
+        $data = $this->request([
+            'method'   => 'flickr.photos.search',
+            'user_id'  => $this->userId,
+            'has_geo'  => 1,
+            'extras'   => 'geo,url_z,url_m',
+            'per_page' => 250,
+            'page'     => $page,
+        ]);
+
+        if (($data['stat'] ?? '') !== 'ok') {
+            throw new RuntimeException('Flickr API error: ' . ($data['message'] ?? 'unknown'));
+        }
+
+        $photos = [];
+        foreach ($data['photos']['photo'] ?? [] as $p) {
+            $lat = (float)($p['latitude']  ?? 0);
+            $lng = (float)($p['longitude'] ?? 0);
+            if ($lat === 0.0 && $lng === 0.0) continue;
+
+            $photos[] = [
+                'id'        => $p['id'],
+                'title'     => $p['title'] ?? '',
+                'lat'       => $lat,
+                'lng'       => $lng,
+                'url_thumb' => $p['url_z'] ?? $p['url_m'] ?? '',
+            ];
+        }
+
+        return [
+            'photos' => $photos,
+            'pages'  => (int)($data['photos']['pages'] ?? 1),
+        ];
+    }
+
     private function buildPhotoUrl(string $farm, string $server, string $id, string $secret, string $size): string
     {
         return "https://farm{$farm}.staticflickr.com/{$server}/{$id}_{$secret}_{$size}.jpg";
