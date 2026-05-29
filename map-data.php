@@ -33,5 +33,15 @@ try {
 }
 
 $json = json_encode($photos, JSON_UNESCAPED_UNICODE);
-file_put_contents($cacheFile, $json);
+if ($json === false) {
+    http_response_code(500);
+    echo json_encode(['error' => 'JSON encoding failed']);
+    exit;
+}
+
+// Écriture atomique pour éviter les lectures partielles sous charge
+$tmp = $cacheFile . '.tmp.' . getmypid();
+file_put_contents($tmp, $json, LOCK_EX);
+rename($tmp, $cacheFile);
+
 echo $json;
