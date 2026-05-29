@@ -334,6 +334,44 @@ a { color: inherit; text-decoration: none; }
 .lightbox-close:hover { background: rgba(255,255,255,0.2); }
 
 /* ============================
+   EXIF + CARTE (lightbox)
+   ============================ */
+.lightbox-exif-loading {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.lightbox-exif-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.lightbox-exif-table td {
+    padding: 0.25rem 0;
+    vertical-align: top;
+}
+
+.exif-key {
+    color: var(--text-muted);
+    width: 90px;
+    padding-right: 0.5rem;
+    white-space: nowrap;
+}
+
+.exif-val {
+    color: var(--text);
+}
+
+.lightbox-map {
+    width: 100%;
+    height: 180px;
+    margin-top: 0.5rem;
+    border: 1px solid var(--border);
+}
+
+/* ============================
    MESSAGE D'ERREUR
    ============================ */
 .error-box {

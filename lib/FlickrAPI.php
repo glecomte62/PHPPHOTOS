@@ -135,7 +135,7 @@ class FlickrAPI
             'method'      => 'flickr.photosets.getPhotos',
             'photoset_id' => $photosetId,
             'user_id'     => $this->userId,
-            'extras'      => 'url_l,url_m,url_sq,date_taken,description,tags',
+            'extras'      => 'url_o,url_l,url_m,url_sq,date_taken,description,tags',
             'per_page'    => 500,
         ]);
 
@@ -150,7 +150,7 @@ class FlickrAPI
                 'title'       => $p['title'] ?? '',
                 'description' => $p['description']['_content'] ?? '',
                 'url_thumb'   => $p['url_sq'] ?? $p['url_m'] ?? '',
-                'url_large'   => $p['url_l']  ?? $p['url_m'] ?? '',
+                'url_large'   => $p['url_o']  ?? $p['url_l'] ?? $p['url_m'] ?? '',
                 'date_taken'  => $p['datetaken'] ?? '',
                 'tags'        => array_filter(explode(' ', $p['tags'] ?? '')),
             ];
@@ -159,6 +159,60 @@ class FlickrAPI
         return [
             'title'  => $data['photoset']['title']['_content'] ?? '',
             'photos' => $photos,
+        ];
+    }
+
+    /**
+     * Retourne les EXIF d'une photo : ['make', 'model', 'focal_length', 'aperture', 'shutter', 'iso']
+     */
+    public function getExif(string $photoId): array
+    {
+        $data = $this->request([
+            'method'   => 'flickr.photos.getExif',
+            'photo_id' => $photoId,
+        ]);
+
+        if (($data['stat'] ?? '') !== 'ok') {
+            return [];
+        }
+
+        $index = [];
+        foreach ($data['photo']['exif'] ?? [] as $tag) {
+            $index[$tag['tag']] = $tag['clean']['_content'] ?? $tag['raw']['_content'] ?? '';
+        }
+
+        return array_filter([
+            'make'         => $index['Make'] ?? '',
+            'model'        => $index['Model'] ?? '',
+            'focal_length' => $index['FocalLength'] ?? '',
+            'aperture'     => $index['FNumber'] ?? $index['ApertureValue'] ?? '',
+            'shutter'      => $index['ExposureTime'] ?? '',
+            'iso'          => $index['ISO'] ?? $index['ISOSpeedRatings'] ?? '',
+        ]);
+    }
+
+    /**
+     * Retourne les coordonnées GPS d'une photo : ['lat', 'lng'] ou []
+     */
+    public function getLocation(string $photoId): array
+    {
+        $data = $this->request([
+            'method'   => 'flickr.photos.geo.getLocation',
+            'photo_id' => $photoId,
+        ]);
+
+        if (($data['stat'] ?? '') !== 'ok') {
+            return [];
+        }
+
+        $loc = $data['photo']['location'] ?? [];
+        if (empty($loc['latitude']) || empty($loc['longitude'])) {
+            return [];
+        }
+
+        return [
+            'lat' => (float)$loc['latitude'],
+            'lng' => (float)$loc['longitude'],
         ];
     }
 

@@ -32,6 +32,7 @@ try {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
 
@@ -67,6 +68,7 @@ try {
         <?php foreach ($photos as $photo): ?>
         <div
             class="photo-item"
+            data-id="<?= htmlspecialchars($photo['id']) ?>"
             data-large="<?= htmlspecialchars($photo['url_large']) ?>"
             data-title="<?= htmlspecialchars($photo['title']) ?>"
             data-desc="<?= htmlspecialchars($photo['description']) ?>"
@@ -95,12 +97,15 @@ try {
     <aside class="lightbox-panel">
         <p class="lightbox-title"></p>
         <p class="lightbox-desc"></p>
+        <div class="lightbox-exif"></div>
+        <div id="lightbox-map" class="lightbox-map" style="display:none"></div>
         <p class="lightbox-date"></p>
         <div class="lightbox-tags"></div>
     </aside>
     <button class="lightbox-close" aria-label="Fermer">&#10005;</button>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/lightbox.js"></script>
 </body>
 </html>
