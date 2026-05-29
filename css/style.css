@@ -203,57 +203,74 @@ a { color: inherit; text-decoration: none; }
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.95);
+    background: #000;
     z-index: 1000;
     opacity: 0;
     transition: opacity 0.25s ease;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
 .lightbox-overlay.active {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
 }
 
 .lightbox-overlay.visible {
     opacity: 1;
 }
 
-.lightbox-main {
-    flex: 1;
+/* Zone image */
+.lightbox-image-wrap {
+    position: relative;
+    width: 100%;
+    flex-shrink: 0;
+    background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    padding: 2rem;
-    position: relative;
+    min-height: 60vh;
+}
+
+.lightbox-img-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-height: 60vh;
 }
 
 .lightbox-img {
-    max-height: 90vh;
-    max-width: 70vw;
+    max-width: 100%;
+    max-height: 70vh;
     object-fit: contain;
-    transform: scale(0.95);
-    transition: transform 0.25s ease;
     display: block;
+    cursor: zoom-in;
+    transition: transform 0.3s ease;
+    user-select: none;
 }
 
-.lightbox-overlay.visible .lightbox-img {
-    transform: scale(1);
-}
-
-.lightbox-panel {
-    width: 300px;
-    min-width: 300px;
-    height: 100vh;
+/* Zone infos en dessous */
+.lightbox-info {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 0;
     background: var(--surface);
-    border-left: 1px solid var(--border);
-    padding: 2rem 1.5rem;
-    overflow-y: auto;
+    border-top: 1px solid var(--border);
+    min-height: 0;
+}
+
+.lightbox-info-left {
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 0.75rem;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+}
+
+.lightbox-info-right {
+    padding: 1rem;
 }
 
 .lightbox-title {
@@ -305,8 +322,9 @@ a { color: inherit; text-decoration: none; }
     justify-content: center;
     cursor: pointer;
     font-size: 1.2rem;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, opacity 0.2s ease;
     user-select: none;
+    z-index: 10;
 }
 
 .lightbox-btn:hover { background: rgba(255,255,255,0.15); }
@@ -315,9 +333,9 @@ a { color: inherit; text-decoration: none; }
 
 .lightbox-close {
     position: fixed;
-    top: 1.25rem;
-    right: 1.25rem;
-    background: rgba(255,255,255,0.08);
+    top: 1rem;
+    right: 1rem;
+    background: rgba(0,0,0,0.6);
     border: 1px solid var(--border);
     color: var(--text);
     width: 36px;
@@ -327,11 +345,11 @@ a { color: inherit; text-decoration: none; }
     justify-content: center;
     cursor: pointer;
     font-size: 1rem;
-    z-index: 1001;
+    z-index: 1010;
     transition: background 0.2s ease;
 }
 
-.lightbox-close:hover { background: rgba(255,255,255,0.2); }
+.lightbox-close:hover { background: rgba(255,255,255,0.15); }
 
 /* ============================
    EXIF + CARTE (lightbox)
@@ -349,25 +367,22 @@ a { color: inherit; text-decoration: none; }
 }
 
 .lightbox-exif-table td {
-    padding: 0.25rem 0;
+    padding: 0.2rem 0;
     vertical-align: top;
 }
 
 .exif-key {
     color: var(--text-muted);
-    width: 90px;
+    width: 110px;
     padding-right: 0.5rem;
     white-space: nowrap;
 }
 
-.exif-val {
-    color: var(--text);
-}
+.exif-val { color: var(--text); }
 
 .lightbox-map {
     width: 100%;
-    height: 180px;
-    margin-top: 0.5rem;
+    height: 220px;
     border: 1px solid var(--border);
 }
 
@@ -393,9 +408,8 @@ a { color: inherit; text-decoration: none; }
     .galleries-grid { grid-template-columns: repeat(2, 1fr); }
     .photos-masonry { columns: 3; }
 
-    .lightbox-panel {
-        width: 260px;
-        min-width: 260px;
+    .lightbox-info {
+        grid-template-columns: 1fr 260px;
     }
 }
 
@@ -403,30 +417,13 @@ a { color: inherit; text-decoration: none; }
     .galleries-grid { grid-template-columns: 1fr; }
     .photos-masonry { columns: 2; }
 
-    .lightbox-overlay.active {
-        flex-direction: column;
+    .lightbox-info {
+        grid-template-columns: 1fr;
     }
 
-    .lightbox-main {
-        height: auto;
-        padding: 1rem;
-        flex: none;
-    }
-
-    .lightbox-img {
-        max-width: 100vw;
-        max-height: 60vh;
-    }
-
-    .lightbox-panel {
-        width: 100%;
-        min-width: 0;
-        height: auto;
-        border-left: none;
-        border-top: 1px solid var(--border);
-        padding: 1rem;
-        flex: 1;
-        overflow-y: auto;
+    .lightbox-info-left {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
     }
 
     .lightbox-btn-prev { left: 0.5rem; }

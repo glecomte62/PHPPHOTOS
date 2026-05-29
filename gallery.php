@@ -89,20 +89,28 @@ try {
 
 <!-- Lightbox -->
 <div id="lightbox-overlay" class="lightbox-overlay">
-    <div class="lightbox-main">
+    <button class="lightbox-close" aria-label="Fermer">&#10005;</button>
+
+    <div class="lightbox-image-wrap">
         <button class="lightbox-btn lightbox-btn-prev" aria-label="Photo précédente">&#8592;</button>
-        <img class="lightbox-img" src="" alt="">
+        <div class="lightbox-img-container">
+            <img class="lightbox-img" src="" alt="">
+        </div>
         <button class="lightbox-btn lightbox-btn-next" aria-label="Photo suivante">&#8594;</button>
     </div>
-    <aside class="lightbox-panel">
-        <p class="lightbox-title"></p>
-        <p class="lightbox-desc"></p>
-        <div class="lightbox-exif"></div>
-        <div id="lightbox-map" class="lightbox-map" style="display:none"></div>
-        <p class="lightbox-date"></p>
-        <div class="lightbox-tags"></div>
-    </aside>
-    <button class="lightbox-close" aria-label="Fermer">&#10005;</button>
+
+    <div class="lightbox-info">
+        <div class="lightbox-info-left">
+            <p class="lightbox-title"></p>
+            <p class="lightbox-desc"></p>
+            <p class="lightbox-date"></p>
+            <div class="lightbox-tags"></div>
+            <div class="lightbox-exif"></div>
+        </div>
+        <div class="lightbox-info-right">
+            <div id="lightbox-map" class="lightbox-map" style="display:none"></div>
+        </div>
+    </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
