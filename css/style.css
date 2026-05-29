@@ -46,6 +46,28 @@ a { color: inherit; text-decoration: none; }
     padding: 1.5rem 2rem;
 }
 
+/* ============================
+   NAVIGATION
+   ============================ */
+.site-nav {
+    margin-left: auto;
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.site-nav-link {
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    transition: color 0.2s;
+    text-decoration: none;
+}
+
+.site-nav-link:hover,
+.site-nav-link.active { color: var(--accent); }
+
 .site-title {
     display: flex;
     align-items: baseline;
@@ -515,6 +537,80 @@ a { color: inherit; text-decoration: none; }
     line-height: 1.7;
     max-width: 700px;
     margin: 0 auto;
+}
+
+/* ============================
+   CARTE
+   ============================ */
+.map-fullscreen {
+    height: calc(100vh - 65px);
+    width: 100%;
+    position: relative;
+}
+
+.map-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    z-index: 500;
+    background: var(--bg);
+}
+
+.leaflet-popup-content-wrapper {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    box-shadow: none;
+    padding: 0;
+}
+
+.leaflet-popup-content {
+    margin: 0;
+}
+
+.leaflet-popup-tip-container .leaflet-popup-tip {
+    background: var(--surface);
+}
+
+.map-popup img {
+    width: 200px;
+    height: 133px;
+    object-fit: cover;
+    display: block;
+}
+
+.map-popup-info {
+    padding: 0.6rem 0.75rem 0.75rem;
+}
+
+.map-popup-title {
+    font-size: 0.8rem;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+    line-height: 1.3;
+}
+
+.map-popup a {
+    font-size: 0.72rem;
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.map-popup a:hover { text-decoration: underline; }
+
+/* Hero nav overlay */
+.hero-nav {
+    position: absolute;
+    top: 0; right: 0;
+    z-index: 10;
+    padding: 1.5rem 2rem;
 }
 
 /* ============================
