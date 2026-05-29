@@ -238,8 +238,11 @@ class FlickrAPI
             ];
         }
 
+        $rawTitle = $data['photoset']['title'] ?? '';
+        $title = is_array($rawTitle) ? ($rawTitle['_content'] ?? '') : (string)$rawTitle;
+
         return [
-            'title'  => $data['photoset']['title']['_content'] ?? '',
+            'title'  => $title,
             'photos' => $photos,
         ];
     }
