@@ -98,5 +98,10 @@ try {
 
 </main>
 
+<footer class="site-footer">
+    <p class="site-footer-copy">&copy; <?= date('Y') ?> Guillaume LECOMTE — Toutes les photographies présentées sur ce site sont protégées par le droit d'auteur. Toute reproduction, diffusion ou utilisation, même partielle, sans autorisation écrite préalable est strictement interdite.</p>
+</footer>
+
+
 </body>
 </html>
