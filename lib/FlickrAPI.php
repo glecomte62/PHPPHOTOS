@@ -182,7 +182,6 @@ class FlickrAPI
         foreach ($handles as $id => $ch) {
             $response = curl_multi_getcontent($ch);
             curl_multi_remove_handle($mh, $ch);
-            curl_close($ch);
 
             if (!$response) continue;
             $data = json_decode($response, true);
@@ -367,7 +366,6 @@ class FlickrAPI
         $response  = curl_exec($ch);
         $curlError = curl_error($ch);
         $curlErrno = curl_errno($ch);
-        curl_close($ch);
 
         if ($response === false) {
             throw new RuntimeException('cURL error (' . $curlErrno . '): ' . ($curlError ?: 'unknown'));
