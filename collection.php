@@ -26,11 +26,11 @@ try {
         throw new RuntimeException('Collection introuvable.');
     }
 
-    $ids = array_column($collection['sets'], 'id');
+    $ids = array_column($collection['sets'] ?? [], 'id');
     $infoMap = $api->getPhotosetsInfo($ids);
 
     // Conserver l'ordre original des sets
-    foreach ($collection['sets'] as $set) {
+    foreach ($collection['sets'] ?? [] as $set) {
         if (isset($infoMap[$set['id']])) {
             $photosets[] = $infoMap[$set['id']];
         }
