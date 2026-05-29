@@ -155,7 +155,7 @@ a { color: inherit; text-decoration: none; }
     color: #fff;
     letter-spacing: 0.04em;
     line-height: 1;
-    text-shadow: 0 2px 24px rgba(0,0,0,0.4);
+    text-shadow: 0 2px 40px rgba(0,0,0,0.8), 0 0 80px rgba(0,0,0,0.5);
 }
 
 .hero-name-last {
@@ -166,17 +166,18 @@ a { color: inherit; text-decoration: none; }
     letter-spacing: 0.4em;
     text-transform: uppercase;
     margin-top: 0.3em;
-    text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+    text-shadow: 0 2px 20px rgba(0,0,0,0.9);
 }
 
 .hero-tagline {
     font-family: var(--font-sans);
     font-size: clamp(0.65rem, 1.2vw, 0.8rem);
     font-weight: 400;
-    color: rgba(255,255,255,0.6);
+    color: rgba(255,255,255,0.85);
     letter-spacing: 0.3em;
     text-transform: uppercase;
     margin-top: 1.2em;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.8);
 }
 
 .hero-scroll {
@@ -612,6 +613,15 @@ a { color: inherit; text-decoration: none; }
     top: 0; right: 0;
     z-index: 10;
     padding: 1.5rem 2rem;
+}
+
+.hero-nav .site-nav-link {
+    color: rgba(255,255,255,0.85);
+    text-shadow: 0 1px 8px rgba(0,0,0,0.8);
+}
+
+.hero-nav .site-nav-link:hover {
+    color: var(--accent);
 }
 
 /* ============================
