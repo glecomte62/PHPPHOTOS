@@ -11,3 +11,35 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php?path=$1 [QSA,L]
+
+# ========================================
+# LiteSpeed Cache (LSCache) — O2switch
+# ========================================
+
+# Activer le cache LiteSpeed
+<IfModule LiteSpeed>
+    CacheLookup on
+</IfModule>
+
+# Cache HTML public : 1h pour les pages statiques
+<FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "public, max-age=3600"
+</FilesMatch>
+
+# Cache assets statiques : 1 an (CSS, JS, images)
+<FilesMatch "\.(css|js|jpg|jpeg|png|gif|webp|svg|ico|woff|woff2|ttf)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+
+# Pages PHP : cache public 5 minutes (les données Flickr changent peu)
+# Exclure map-data.php et photo-info.php (données dynamiques gérées côté PHP)
+<FilesMatch "^(map-data|photo-info)\.php$">
+    Header set Cache-Control "no-store, no-cache"
+    Header set X-LiteSpeed-Cache-Control "no-cache"
+</FilesMatch>
+
+# Pages principales (index, collection, gallery, map)
+<FilesMatch "^(index|collection|gallery|map)\.php$">
+    Header set Cache-Control "public, max-age=300, stale-while-revalidate=60"
+    Header set X-LiteSpeed-Cache-Control "public, max-age=300"
+</FilesMatch>
