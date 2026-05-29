@@ -26,11 +26,13 @@ try {
         throw new RuntimeException('Collection introuvable.');
     }
 
+    $ids = array_column($collection['sets'], 'id');
+    $infoMap = $api->getPhotosetsInfo($ids);
+
+    // Conserver l'ordre original des sets
     foreach ($collection['sets'] as $set) {
-        try {
-            $photosets[] = $api->getPhotosetInfo($set['id']);
-        } catch (RuntimeException) {
-            // album inaccessible, on passe
+        if (isset($infoMap[$set['id']])) {
+            $photosets[] = $infoMap[$set['id']];
         }
     }
 } catch (RuntimeException $e) {
