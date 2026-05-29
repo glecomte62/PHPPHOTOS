@@ -1,35 +1,43 @@
 (function () {
     'use strict';
 
-    let photos = [];
-    let current = 0;
-    let overlay, imgContainer, img, title, desc, date, tags, exifEl, mapEl;
-    let leafletMap = null;
-    let leafletMarker = null;
-    let zoomed = false;
+    var photos   = [];
+    var current  = 0;
+    var infoLoaded = {};   // index -> true une fois EXIF/carte chargés
+    var zoomed   = false;
+
+    var overlay, imgWrap, img, panel, panelTitle, panelDate, tagsEl, exifEl, mapEl;
+    var btnClose, btnInfo, btnPrev, btnNext;
+    var leafletMap = null;
+    var leafletMarker = null;
 
     function init() {
-        overlay      = document.getElementById('lightbox-overlay');
+        overlay   = document.getElementById('lightbox-overlay');
         if (!overlay) return;
 
-        imgContainer = overlay.querySelector('.lightbox-img-container');
-        img          = overlay.querySelector('.lightbox-img');
-        title        = overlay.querySelector('.lightbox-title');
-        desc         = overlay.querySelector('.lightbox-desc');
-        date         = overlay.querySelector('.lightbox-date');
-        tags         = overlay.querySelector('.lightbox-tags');
-        exifEl       = overlay.querySelector('.lightbox-exif');
-        mapEl        = document.getElementById('lightbox-map');
+        imgWrap    = overlay.querySelector('.lightbox-img-wrap');
+        img        = overlay.querySelector('.lightbox-img');
+        panel      = document.getElementById('lightbox-panel');
+        panelTitle = panel.querySelector('.lightbox-panel-title');
+        panelDate  = panel.querySelector('.lightbox-panel-date');
+        tagsEl     = panel.querySelector('.lightbox-tags');
+        exifEl     = panel.querySelector('.lightbox-exif');
+        mapEl      = document.getElementById('lightbox-map');
 
-        overlay.querySelector('.lightbox-close').addEventListener('click', close);
-        overlay.querySelector('.lightbox-btn-prev').addEventListener('click', function () { if (!zoomed) prev(); });
-        overlay.querySelector('.lightbox-btn-next').addEventListener('click', function () { if (!zoomed) next(); });
+        btnClose = overlay.querySelector('.lightbox-close');
+        btnInfo  = document.getElementById('lightbox-info-btn');
+        btnPrev  = overlay.querySelector('.lightbox-prev');
+        btnNext  = overlay.querySelector('.lightbox-next');
 
+        btnClose.addEventListener('click', close);
+        btnInfo.addEventListener('click', togglePanel);
+        btnPrev.addEventListener('click', function () { if (!zoomed) prev(); });
+        btnNext.addEventListener('click', function () { if (!zoomed) next(); });
         img.addEventListener('click', toggleZoom);
 
         document.addEventListener('keydown', function (e) {
             if (!overlay.classList.contains('active')) return;
-            if (e.key === 'Escape')     { if (zoomed) unzoom(); else close(); }
+            if (e.key === 'Escape')    { if (zoomed) unzoom(); else if (panelOpen()) closePanel(); else close(); }
             if (e.key === 'ArrowLeft'  && !zoomed) prev();
             if (e.key === 'ArrowRight' && !zoomed) next();
         });
@@ -45,7 +53,7 @@
                 title: el.dataset.title || '',
                 desc:  el.dataset.desc  || '',
                 date:  el.dataset.date  || '',
-                tags:  el.dataset.tags  ? JSON.parse(el.dataset.tags) : [],
+                tags:  el.dataset.tags ? JSON.parse(el.dataset.tags) : [],
             };
         });
     }
@@ -53,42 +61,105 @@
     function open(index) {
         current = index;
         unzoom();
+        closePanel();
         overlay.classList.add('active');
         requestAnimationFrame(function () { overlay.classList.add('visible'); });
-        render();
+        renderImage();
     }
 
     function close() {
         unzoom();
+        closePanel();
         overlay.classList.remove('visible');
-        setTimeout(function () { overlay.classList.remove('active'); }, 250);
+        setTimeout(function () { overlay.classList.remove('active'); }, 200);
     }
 
     function prev() {
         current = (current - 1 + photos.length) % photos.length;
-        render();
+        closePanel();
+        unzoom();
+        renderImage();
     }
 
     function next() {
         current = (current + 1) % photos.length;
-        render();
+        closePanel();
+        unzoom();
+        renderImage();
     }
 
+    function renderImage() {
+        var p = photos[current];
+        img.src          = p.large;
+        img.alt          = p.title || '';
+        img.style.cursor = 'zoom-in';
+    }
+
+    /* ---- Panneau ---- */
+    function panelOpen() {
+        return panel.classList.contains('open');
+    }
+
+    function togglePanel() {
+        if (panelOpen()) {
+            closePanel();
+        } else {
+            openPanel();
+        }
+    }
+
+    function openPanel() {
+        var p = photos[current];
+
+        // Remplir titre + date immédiatement
+        panelTitle.textContent = p.title || '—';
+        panelDate.textContent  = p.date ? formatDate(p.date) : '';
+
+        // Tags
+        tagsEl.innerHTML = '';
+        (p.tags || []).forEach(function (t) {
+            var span = document.createElement('span');
+            span.className   = 'lightbox-tag';
+            span.textContent = t;
+            tagsEl.appendChild(span);
+        });
+
+        // Charger EXIF/carte une seule fois par photo
+        if (!infoLoaded[current]) {
+            exifEl.innerHTML = '<p class="lightbox-exif-loading">Chargement…</p>';
+            mapEl.style.display = 'none';
+            if (p.id) loadPhotoInfo(p.id, current);
+        }
+
+        panel.classList.add('open');
+        overlay.classList.add('panel-open');
+        btnInfo.classList.add('active-info');
+        btnInfo.setAttribute('aria-expanded', 'true');
+    }
+
+    function closePanel() {
+        panel.classList.remove('open');
+        overlay.classList.remove('panel-open');
+        if (btnInfo) {
+            btnInfo.classList.remove('active-info');
+            btnInfo.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    /* ---- Zoom ---- */
     function toggleZoom(e) {
         if (zoomed) {
             unzoom();
         } else {
-            // Calcule le point de zoom relatif au clic
-            const rect = img.getBoundingClientRect();
-            const ox = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1) + '%';
-            const oy = ((e.clientY - rect.top)  / rect.height * 100).toFixed(1) + '%';
+            var rect = img.getBoundingClientRect();
+            var ox = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1) + '%';
+            var oy = ((e.clientY - rect.top)  / rect.height * 100).toFixed(1) + '%';
             img.style.transformOrigin = ox + ' ' + oy;
             img.style.transform       = 'scale(2.5)';
             img.style.cursor          = 'zoom-out';
-            imgContainer.style.overflow = 'auto';
-            imgContainer.classList.add('zoomed');
-            overlay.querySelector('.lightbox-btn-prev').style.opacity = '0.2';
-            overlay.querySelector('.lightbox-btn-next').style.opacity = '0.2';
+            imgWrap.style.overflow    = 'auto';
+            btnPrev.style.opacity     = '0.15';
+            btnNext.style.opacity     = '0.15';
             zoomed = true;
         }
     }
@@ -98,58 +169,34 @@
         img.style.transform       = '';
         img.style.transformOrigin = '';
         img.style.cursor          = 'zoom-in';
-        if (imgContainer) {
-            imgContainer.style.overflow = '';
-            imgContainer.classList.remove('zoomed');
-        }
-        if (overlay) {
-            var btnPrev = overlay.querySelector('.lightbox-btn-prev');
-            var btnNext = overlay.querySelector('.lightbox-btn-next');
-            if (btnPrev) btnPrev.style.opacity = '';
-            if (btnNext) btnNext.style.opacity = '';
-        }
+        if (imgWrap) imgWrap.style.overflow = '';
+        if (btnPrev) btnPrev.style.opacity = '';
+        if (btnNext) btnNext.style.opacity = '';
         zoomed = false;
     }
 
-    function render() {
-        const p = photos[current];
-        img.src           = p.large;
-        img.style.cursor  = 'zoom-in';
-        title.textContent = p.title || '—';
-        desc.textContent  = p.desc  || '';
-        date.textContent  = p.date  ? formatDate(p.date) : '';
-
-        tags.innerHTML = '';
-        p.tags.forEach(function (t) {
-            const span = document.createElement('span');
-            span.className   = 'lightbox-tag';
-            span.textContent = t;
-            tags.appendChild(span);
-        });
-
-        exifEl.innerHTML = '<p class="lightbox-exif-loading">Chargement…</p>';
-        mapEl.style.display = 'none';
-
-        if (p.id) loadPhotoInfo(p.id);
-    }
-
-    function loadPhotoInfo(photoId) {
+    /* ---- EXIF + Carte ---- */
+    function loadPhotoInfo(photoId, index) {
         fetch('photo-info.php?id=' + encodeURIComponent(photoId))
             .then(function (r) { return r.json(); })
             .then(function (data) {
+                if (current !== index) return; // navigation entre-temps
                 renderExif(data.exif || {});
                 renderMap(data.location || null);
+                infoLoaded[index] = true;
             })
-            .catch(function () { exifEl.innerHTML = ''; });
+            .catch(function () {
+                exifEl.innerHTML = '';
+            });
     }
 
-    const EXIF_LABELS = [
+    var EXIF_LABELS = [
         ['Make',                    'Fabricant'],
         ['Model',                   'Appareil'],
         ['LensModel',               'Objectif'],
         ['LensInfo',                'Info objectif'],
         ['FocalLength',             'Focale'],
-        ['FocalLengthIn35mmFormat', 'Focale (35mm)'],
+        ['FocalLengthIn35mmFormat', 'Focale 35mm'],
         ['FNumber',                 'Ouverture'],
         ['ExposureTime',            'Vitesse'],
         ['ISO',                     'ISO'],
@@ -160,18 +207,10 @@
         ['WhiteBalance',            'Balance blancs'],
         ['Flash',                   'Flash'],
         ['SceneCaptureType',        'Type de scène'],
-        ['Contrast',                'Contraste'],
-        ['Saturation',              'Saturation'],
-        ['Sharpness',               'Netteté'],
-        ['DigitalZoomRatio',        'Zoom numérique'],
-        ['SubjectDistanceRange',    'Distance sujet'],
-        ['LightSource',             'Source lumière'],
         ['ColorSpace',              'Espace couleur'],
         ['ExifImageWidth',          'Largeur'],
         ['ExifImageHeight',         'Hauteur'],
-        ['Orientation',             'Orientation'],
         ['Software',                'Logiciel'],
-        ['DateTime',                'Date modif.'],
         ['DateTimeOriginal',        'Date prise de vue'],
         ['Artist',                  'Artiste'],
         ['Copyright',               'Copyright'],
@@ -182,28 +221,29 @@
         exifEl.innerHTML = '';
         if (!Object.keys(exif).length) return;
 
-        const rows = [];
-        const seen = new Set();
+        var rows = [];
+        var seen = {};
 
-        EXIF_LABELS.forEach(function ([tag, label]) {
-            if (exif[tag] && !seen.has(tag)) {
-                seen.add(tag);
+        EXIF_LABELS.forEach(function (pair) {
+            var tag = pair[0], label = pair[1];
+            if (exif[tag] && !seen[tag]) {
+                seen[tag] = true;
                 rows.push([label, exif[tag]]);
             }
         });
 
         Object.keys(exif).sort().forEach(function (tag) {
-            if (!seen.has(tag)) rows.push([tag, exif[tag]]);
+            if (!seen[tag]) rows.push([tag, exif[tag]]);
         });
 
         if (!rows.length) return;
 
-        const table = document.createElement('table');
+        var table = document.createElement('table');
         table.className = 'lightbox-exif-table';
         rows.forEach(function (row) {
-            const tr  = document.createElement('tr');
-            const key = document.createElement('td');
-            const val = document.createElement('td');
+            var tr  = document.createElement('tr');
+            var key = document.createElement('td');
+            var val = document.createElement('td');
             key.className   = 'exif-key';
             val.className   = 'exif-val';
             key.textContent = row[0];
@@ -224,7 +264,7 @@
         mapEl.style.display = 'block';
 
         if (!leafletMap) {
-            leafletMap   = L.map('lightbox-map', { zoomControl: true, attributionControl: false });
+            leafletMap    = L.map('lightbox-map', { zoomControl: true, attributionControl: false });
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(leafletMap);
             leafletMarker = L.marker([location.lat, location.lng]).addTo(leafletMap);
         } else {
@@ -237,7 +277,7 @@
 
     function formatDate(str) {
         if (!str) return '';
-        const d = new Date(str);
+        var d = new Date(str);
         if (isNaN(d)) return str;
         return d.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
     }
