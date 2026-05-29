@@ -109,7 +109,7 @@ try {
     </div>
 
     <button class="lightbox-close" aria-label="Fermer">&#10005;</button>
-    <button class="lightbox-info" id="lightbox-info-btn" aria-label="Informations">i</button>
+    <button class="lightbox-info" id="lightbox-info-btn" aria-label="Informations" aria-expanded="false" aria-controls="lightbox-panel">i</button>
 
 </div>
 
