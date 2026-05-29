@@ -135,7 +135,7 @@ class FlickrAPI
             'method'      => 'flickr.photosets.getPhotos',
             'photoset_id' => $photosetId,
             'user_id'     => $this->userId,
-            'extras'      => 'url_o,url_l,url_m,url_sq,date_taken,description,tags',
+            'extras'      => 'url_l,url_m,url_z,url_sq,date_taken,description,tags',
             'per_page'    => 500,
         ]);
 
@@ -149,8 +149,8 @@ class FlickrAPI
                 'id'          => $p['id'],
                 'title'       => $p['title'] ?? '',
                 'description' => $p['description']['_content'] ?? '',
-                'url_thumb'   => $p['url_sq'] ?? $p['url_m'] ?? '',
-                'url_large'   => $p['url_o']  ?? $p['url_l'] ?? $p['url_m'] ?? '',
+                'url_thumb'   => $p['url_z']  ?? $p['url_m'] ?? '',
+                'url_large'   => $p['url_l']  ?? $p['url_m'] ?? '',
                 'date_taken'  => $p['datetaken'] ?? '',
                 'tags'        => array_filter(explode(' ', $p['tags'] ?? '')),
             ];

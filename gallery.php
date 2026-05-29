@@ -76,7 +76,7 @@ try {
             data-tags="<?= htmlspecialchars(json_encode(array_values($photo['tags']))) ?>"
         >
             <img
-                src="<?= htmlspecialchars($photo['url_large']) ?>"
+                src="<?= htmlspecialchars($photo['url_thumb']) ?>"
                 alt="<?= htmlspecialchars($photo['title']) ?>"
                 loading="lazy"
             >
