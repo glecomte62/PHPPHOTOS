@@ -309,7 +309,8 @@ class FlickrAPI
             'user_id'  => $this->userId,
             'has_geo'  => 1,
             'extras'   => 'geo,url_z,url_m',
-            'per_page' => 250,
+            'per_page' => 500,
+            'sort'     => 'date-posted-desc',
             'page'     => $page,
         ]);
 
