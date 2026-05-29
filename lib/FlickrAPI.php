@@ -150,6 +150,10 @@ class FlickrAPI
             ];
             $url = $this->baseUrl . '?' . http_build_query($params);
             $ch  = curl_init($url);
+            if ($ch === false) {
+                curl_multi_close($mh);
+                throw new RuntimeException('cURL initialization failed');
+            }
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT        => 10,
@@ -163,8 +167,16 @@ class FlickrAPI
         // Exécuter tous les handles en parallèle
         do {
             $status = curl_multi_exec($mh, $active);
-            if ($active) curl_multi_select($mh);
+            if ($active) {
+                $wait = curl_multi_select($mh);
+                if ($wait === -1) usleep(100);
+            }
         } while ($active && $status === CURLM_OK);
+
+        if ($status !== CURLM_OK) {
+            curl_multi_close($mh);
+            throw new RuntimeException('curl_multi_exec error: ' . $status);
+        }
 
         $results = [];
         foreach ($handles as $id => $ch) {
