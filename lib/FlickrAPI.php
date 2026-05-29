@@ -13,6 +13,50 @@ class FlickrAPI
     }
 
     /**
+     * Retourne l'arbre des collections de l'utilisateur.
+     * Chaque élément : ['id', 'title', 'description', 'cover_url', 'sets' => [...]]
+     */
+    public function getCollections(): array
+    {
+        $data = $this->request([
+            'method'  => 'flickr.collections.getTree',
+            'user_id' => $this->userId,
+        ]);
+
+        if (($data['stat'] ?? '') !== 'ok') {
+            throw new RuntimeException('Flickr API error: ' . ($data['message'] ?? 'unknown'));
+        }
+
+        $collections = [];
+        foreach ($data['collections']['collection'] ?? [] as $col) {
+            $coverUrl = '';
+            if (!empty($col['iconlarge'])) {
+                $coverUrl = $col['iconlarge'];
+            } elseif (!empty($col['iconsmall'])) {
+                $coverUrl = $col['iconsmall'];
+            }
+
+            $sets = [];
+            foreach ($col['set'] ?? [] as $set) {
+                $sets[] = [
+                    'id'    => $set['id'],
+                    'title' => $set['title'] ?? '',
+                ];
+            }
+
+            $collections[] = [
+                'id'          => $col['id'],
+                'title'       => $col['title'] ?? '',
+                'description' => $col['description'] ?? '',
+                'cover_url'   => $coverUrl,
+                'sets'        => $sets,
+            ];
+        }
+
+        return $collections;
+    }
+
+    /**
      * Retourne la liste des galeries (photosets) de l'utilisateur.
      * Chaque élément : ['id', 'title', 'cover_url', 'photo_count']
      */
@@ -47,6 +91,35 @@ class FlickrAPI
         }
 
         return $photosets;
+    }
+
+    /**
+     * Retourne les infos d'un photoset (titre, vignette, nb photos).
+     */
+    public function getPhotosetInfo(string $photosetId): array
+    {
+        $data = $this->request([
+            'method'      => 'flickr.photosets.getInfo',
+            'photoset_id' => $photosetId,
+            'user_id'     => $this->userId,
+        ]);
+
+        if (($data['stat'] ?? '') !== 'ok') {
+            throw new RuntimeException('Flickr API error: ' . ($data['message'] ?? 'unknown'));
+        }
+
+        $ps = $data['photoset'];
+        $coverUrl = isset($ps['farm'], $ps['server'], $ps['primary'], $ps['secret'])
+            ? $this->buildPhotoUrl($ps['farm'], $ps['server'], $ps['primary'], $ps['secret'], 'z')
+            : '';
+
+        return [
+            'id'          => $ps['id'],
+            'title'       => $ps['title']['_content'] ?? '',
+            'description' => $ps['description']['_content'] ?? '',
+            'photo_count' => (int)($ps['photos'] ?? 0),
+            'cover_url'   => $coverUrl,
+        ];
     }
 
     /**
