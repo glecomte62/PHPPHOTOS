@@ -29,19 +29,21 @@ class FlickrAPI
 
         $collections = [];
         foreach ($data['collections']['collection'] ?? [] as $col) {
-            $coverUrl = '';
-            if (!empty($col['iconlarge'])) {
-                $coverUrl = $col['iconlarge'];
-            } elseif (!empty($col['iconsmall'])) {
-                $coverUrl = $col['iconsmall'];
-            }
-
             $sets = [];
             foreach ($col['set'] ?? [] as $set) {
                 $sets[] = [
                     'id'    => $set['id'],
                     'title' => $set['title'] ?? '',
                 ];
+            }
+
+            // Utilise la vignette du premier album comme couverture
+            $coverUrl = '';
+            if (!empty($sets)) {
+                try {
+                    $info = $this->getPhotosetInfo($sets[0]['id']);
+                    $coverUrl = $info['cover_url'];
+                } catch (RuntimeException) {}
             }
 
             $collections[] = [
