@@ -53,6 +53,10 @@ require_once __DIR__ . '/config.php';
             return r.json();
         })
         .then(function (photos) {
+            if (photos.length === 0) {
+                loading.textContent = 'Aucune photo géolocalisée trouvée.';
+                return;
+            }
             loading.style.display = 'none';
 
             photos.forEach(function (p) {
@@ -66,7 +70,7 @@ require_once __DIR__ . '/config.php';
                 });
 
                 var thumb = p.url_thumb
-                    ? '<img src="' + p.url_thumb + '" alt="' + escHtml(p.title) + '">'
+                    ? '<img src="' + escHtml(p.url_thumb) + '" alt="' + escHtml(p.title) + '">'
                     : '';
 
                 marker.bindPopup(
