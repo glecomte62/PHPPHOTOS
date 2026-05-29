@@ -25,11 +25,10 @@ try {
 </head>
 <body>
 
-<nav class="hero-nav site-nav">
-    <a class="site-nav-link" href="map.php">Carte</a>
-</nav>
-
 <section class="hero">
+    <nav class="hero-nav site-nav">
+        <a class="site-nav-link" href="map.php">Carte</a>
+    </nav>
     <div class="hero-identity">
         <p class="hero-name-first">Guillaume</p>
         <p class="hero-name-last">LECOMTE</p>
