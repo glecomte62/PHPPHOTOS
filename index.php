@@ -25,10 +25,6 @@ try {
 </head>
 <body>
 
-<header class="site-header site-header--over-hero">
-    <a class="site-title" href="index.php"><span class="site-title-first">Guillaume</span> <span class="site-title-last">LECOMTE</span></a>
-    <span class="site-subtitle">Photographies</span>
-</header>
 
 <section class="hero">
     <div class="hero-identity">
