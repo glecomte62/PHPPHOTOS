@@ -89,28 +89,28 @@ try {
 
 <!-- Lightbox -->
 <div id="lightbox-overlay" class="lightbox-overlay">
-    <button class="lightbox-close" aria-label="Fermer">&#10005;</button>
 
-    <div class="lightbox-image-wrap">
-        <button class="lightbox-btn lightbox-btn-prev" aria-label="Photo précédente">&#8592;</button>
-        <div class="lightbox-img-container">
-            <img class="lightbox-img" src="" alt="">
-        </div>
-        <button class="lightbox-btn lightbox-btn-next" aria-label="Photo suivante">&#8594;</button>
+    <div class="lightbox-img-wrap">
+        <img class="lightbox-img" src="" alt="">
+        <button class="lightbox-prev" aria-label="Photo précédente">&#8592;</button>
+        <button class="lightbox-next" aria-label="Photo suivante">&#8594;</button>
     </div>
 
-    <div class="lightbox-info">
-        <div class="lightbox-info-left">
-            <p class="lightbox-title"></p>
-            <p class="lightbox-desc"></p>
-            <p class="lightbox-date"></p>
+    <div class="lightbox-panel" id="lightbox-panel">
+        <div class="lightbox-panel-header">
+            <p class="lightbox-panel-title"></p>
+            <p class="lightbox-panel-date"></p>
+        </div>
+        <div class="lightbox-panel-body">
             <div class="lightbox-tags"></div>
             <div class="lightbox-exif"></div>
-        </div>
-        <div class="lightbox-info-right">
             <div id="lightbox-map" class="lightbox-map" style="display:none"></div>
         </div>
     </div>
+
+    <button class="lightbox-close" aria-label="Fermer">&#10005;</button>
+    <button class="lightbox-info" id="lightbox-info-btn" aria-label="Informations">i</button>
+
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
