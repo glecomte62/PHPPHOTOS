@@ -57,6 +57,9 @@ try {
     <?php else: ?>
     <span class="site-title-section"><?= htmlspecialchars($galleryTitle) ?></span>
     <?php endif; ?>
+    <nav class="site-nav">
+        <a class="site-nav-link" href="map.php">Carte</a>
+    </nav>
 </header>
 
 <nav class="breadcrumb">

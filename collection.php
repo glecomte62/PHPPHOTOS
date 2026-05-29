@@ -58,6 +58,9 @@ try {
     <?php if (!empty($collection['description'])): ?>
     <span class="site-subtitle"><?= htmlspecialchars($collection['description']) ?></span>
     <?php endif; ?>
+    <nav class="site-nav">
+        <a class="site-nav-link" href="map.php">Carte</a>
+    </nav>
 </header>
 
 <main class="container">
