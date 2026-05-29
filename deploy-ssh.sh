@@ -13,15 +13,15 @@ set -e
 
 # Configuration O2switch
 SSH_HOST="legu7203.odns.fr"
-SSH_PORT="7822"
+SSH_PORT="22"
 SSH_USER="legu7203"
-SSH_KEY="~/.ssh/id_ed25519"
+SSH_KEY="~/.ssh/phpphotos"
 
 # Chemin distant
 REMOTE_DIR="/home/legu7203/phpphotos"
 
 # Chemin local (dossier du script)
-LOCAL_DIR="$(cd "$(dirname "$0")" && pwd)/app"
+LOCAL_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Multiplexage SSH
 SOCKET_DIR="$HOME/.ssh/sockets"

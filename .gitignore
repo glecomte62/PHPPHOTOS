@@ -1,3 +1,4 @@
-app/.env
+.env
 .DS_Store
 .superpowers/
+.claude/
