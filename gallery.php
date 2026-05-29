@@ -37,7 +37,7 @@ try {
 <body>
 
 <header class="site-header">
-    <span class="site-title">Guillaume LECOMTE</span>
+    <a class="site-title" href="index.php"><span class="site-title-first">Guillaume</span> <span class="site-title-last">LECOMTE</span></a>
     <span class="site-subtitle">Photographies</span>
 </header>
 

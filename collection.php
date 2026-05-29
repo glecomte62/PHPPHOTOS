@@ -53,8 +53,8 @@ try {
 <body>
 
 <header class="site-header">
-    <a class="site-back" href="index.php">← Collections</a>
-    <span class="site-title"><?= htmlspecialchars($collection['title'] ?? 'Collection') ?></span>
+    <a class="site-title" href="index.php"><span class="site-title-first">Guillaume</span> <span class="site-title-last">LECOMTE</span></a>
+    <span class="site-title-section"><?= htmlspecialchars($collection['title'] ?? 'Collection') ?></span>
     <?php if (!empty($collection['description'])): ?>
     <span class="site-subtitle"><?= htmlspecialchars($collection['description']) ?></span>
     <?php endif; ?>
