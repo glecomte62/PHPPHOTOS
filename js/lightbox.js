@@ -106,17 +106,63 @@
             });
     }
 
+    // Ordre d'affichage et traductions des tags EXIF connus
+    const EXIF_LABELS = [
+        ['Make',                      'Fabricant'],
+        ['Model',                     'Appareil'],
+        ['LensModel',                 'Objectif'],
+        ['LensInfo',                  'Info objectif'],
+        ['FocalLength',               'Focale'],
+        ['FocalLengthIn35mmFormat',   'Focale (35mm)'],
+        ['FNumber',                   'Ouverture'],
+        ['ExposureTime',              'Vitesse'],
+        ['ISO',                       'ISO'],
+        ['ISOSpeedRatings',           'ISO'],
+        ['ExposureBiasValue',         'Correction expo'],
+        ['ExposureProgram',           'Programme'],
+        ['MeteringMode',              'Mesure'],
+        ['WhiteBalance',              'Balance blancs'],
+        ['Flash',                     'Flash'],
+        ['SceneCaptureType',          'Type de scène'],
+        ['Contrast',                  'Contraste'],
+        ['Saturation',                'Saturation'],
+        ['Sharpness',                 'Netteté'],
+        ['DigitalZoomRatio',          'Zoom numérique'],
+        ['SubjectDistanceRange',      'Distance sujet'],
+        ['LightSource',               'Source lumière'],
+        ['ColorSpace',                'Espace couleur'],
+        ['ExifImageWidth',            'Largeur'],
+        ['ExifImageHeight',           'Hauteur'],
+        ['Orientation',               'Orientation'],
+        ['Software',                  'Logiciel'],
+        ['DateTime',                  'Date modif.'],
+        ['DateTimeOriginal',          'Date prise de vue'],
+        ['Artist',                    'Artiste'],
+        ['Copyright',                 'Copyright'],
+        ['GPSAltitude',               'Altitude GPS'],
+    ];
+
     function renderExif(exif) {
         exifEl.innerHTML = '';
         if (!Object.keys(exif).length) return;
 
         const rows = [];
-        const device = [exif.make, exif.model].filter(Boolean).join(' ');
-        if (device) rows.push(['Appareil', device]);
-        if (exif.focal_length) rows.push(['Focale', exif.focal_length]);
-        if (exif.aperture)     rows.push(['Ouverture', 'f/' + exif.aperture.replace('f/', '').replace('f', '')]);
-        if (exif.shutter)      rows.push(['Vitesse', exif.shutter + 's']);
-        if (exif.iso)          rows.push(['ISO', exif.iso]);
+        const seen = new Set();
+
+        // Tags connus dans l'ordre défini
+        EXIF_LABELS.forEach(function ([tag, label]) {
+            if (exif[tag] && !seen.has(tag)) {
+                seen.add(tag);
+                rows.push([label, exif[tag]]);
+            }
+        });
+
+        // Tags inconnus restants (triés alphabétiquement)
+        Object.keys(exif).sort().forEach(function (tag) {
+            if (!seen.has(tag)) {
+                rows.push([tag, exif[tag]]);
+            }
+        });
 
         if (!rows.length) return;
 
@@ -124,7 +170,14 @@
         table.className = 'lightbox-exif-table';
         rows.forEach(function (row) {
             const tr = document.createElement('tr');
-            tr.innerHTML = '<td class="exif-key">' + row[0] + '</td><td class="exif-val">' + row[1] + '</td>';
+            const key = document.createElement('td');
+            const val = document.createElement('td');
+            key.className   = 'exif-key';
+            val.className   = 'exif-val';
+            key.textContent = row[0];
+            val.textContent = row[1];
+            tr.appendChild(key);
+            tr.appendChild(val);
             table.appendChild(tr);
         });
         exifEl.appendChild(table);

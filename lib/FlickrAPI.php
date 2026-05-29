@@ -163,7 +163,7 @@ class FlickrAPI
     }
 
     /**
-     * Retourne les EXIF d'une photo : ['make', 'model', 'focal_length', 'aperture', 'shutter', 'iso']
+     * Retourne tous les tags EXIF bruts d'une photo : ['TagName' => 'valeur', ...]
      */
     public function getExif(string $photoId): array
     {
@@ -176,19 +176,15 @@ class FlickrAPI
             return [];
         }
 
-        $index = [];
+        $result = [];
         foreach ($data['photo']['exif'] ?? [] as $tag) {
-            $index[$tag['tag']] = $tag['clean']['_content'] ?? $tag['raw']['_content'] ?? '';
+            $value = $tag['clean']['_content'] ?? $tag['raw']['_content'] ?? '';
+            if ($value !== '') {
+                $result[$tag['tag']] = $value;
+            }
         }
 
-        return array_filter([
-            'make'         => $index['Make'] ?? '',
-            'model'        => $index['Model'] ?? '',
-            'focal_length' => $index['FocalLength'] ?? '',
-            'aperture'     => $index['FNumber'] ?? $index['ApertureValue'] ?? '',
-            'shutter'      => $index['ExposureTime'] ?? '',
-            'iso'          => $index['ISO'] ?? $index['ISOSpeedRatings'] ?? '',
-        ]);
+        return $result;
     }
 
     /**
