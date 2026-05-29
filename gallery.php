@@ -9,15 +9,28 @@ if (empty($photosetId) || !preg_match('/^\d+$/', $photosetId)) {
     exit;
 }
 
+$collectionId = $_GET['col'] ?? '';
+
 $api    = new FlickrAPI(FLICKR_API_KEY, FLICKR_USER_ID);
 $error  = null;
 $photos = [];
-$galleryTitle = 'Galerie';
+$galleryTitle     = 'Galerie';
+$collectionTitle  = '';
 
 try {
     $result       = $api->getPhotos($photosetId);
     $photos       = $result['photos'];
     $galleryTitle = $result['title'] ?: $galleryTitle;
+
+    if ($collectionId) {
+        $collections = $api->getCollections();
+        foreach ($collections as $col) {
+            if ($col['id'] === $collectionId) {
+                $collectionTitle = $col['title'];
+                break;
+            }
+        }
+    }
 } catch (RuntimeException $e) {
     $error = $e->getMessage();
 }
@@ -38,13 +51,20 @@ try {
 
 <header class="site-header">
     <a class="site-title" href="index.php"><span class="site-title-first">Guillaume</span> <span class="site-title-last">LECOMTE</span></a>
-    <span class="site-subtitle">Photographies</span>
+    <?php if ($collectionTitle): ?>
+    <span class="site-title-section"><?= htmlspecialchars($collectionTitle) ?></span>
+    <span class="site-title-section"><?= htmlspecialchars($galleryTitle) ?></span>
+    <?php else: ?>
+    <span class="site-title-section"><?= htmlspecialchars($galleryTitle) ?></span>
+    <?php endif; ?>
 </header>
 
 <nav class="breadcrumb">
-    <a href="index.php">← Toutes les galeries</a>
-    &nbsp;/&nbsp;
-    <?= htmlspecialchars($galleryTitle) ?>
+    <a href="index.php">Collections</a>
+    <?php if ($collectionTitle && $collectionId): ?>
+    &nbsp;/&nbsp;<a href="collection.php?id=<?= htmlspecialchars($collectionId) ?>"><?= htmlspecialchars($collectionTitle) ?></a>
+    <?php endif; ?>
+    &nbsp;/&nbsp;<?= htmlspecialchars($galleryTitle) ?>
 </nav>
 
 <main class="container">

@@ -76,7 +76,7 @@ try {
     <?php else: ?>
     <div class="galleries-grid">
         <?php foreach ($photosets as $set): ?>
-        <a class="gallery-card" href="gallery.php?id=<?= htmlspecialchars($set['id']) ?>">
+        <a class="gallery-card" href="gallery.php?id=<?= htmlspecialchars($set['id']) ?>&col=<?= htmlspecialchars($collectionId) ?>">
             <?php if ($set['cover_url']): ?>
             <img
                 class="gallery-card-cover"
