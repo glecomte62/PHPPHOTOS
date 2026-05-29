@@ -25,10 +25,19 @@ try {
 </head>
 <body>
 
-<header class="site-header">
+<header class="site-header site-header--over-hero">
     <a class="site-title" href="index.php"><span class="site-title-first">Guillaume</span> <span class="site-title-last">LECOMTE</span></a>
     <span class="site-subtitle">Photographies</span>
 </header>
+
+<section class="hero">
+    <div class="hero-identity">
+        <p class="hero-name-first">Guillaume</p>
+        <p class="hero-name-last">LECOMTE</p>
+        <p class="hero-tagline">Photographies</p>
+    </div>
+    <div class="hero-scroll">&#8595;</div>
+</section>
 
 <main class="container">
 
