@@ -14,13 +14,16 @@ $collectionId = $_GET['col'] ?? '';
 $api    = new FlickrAPI(FLICKR_API_KEY, FLICKR_USER_ID);
 $error  = null;
 $photos = [];
-$galleryTitle     = 'Galerie';
-$collectionTitle  = '';
+$galleryTitle       = 'Galerie';
+$galleryDescription = '';
+$collectionTitle    = '';
 
 try {
-    $result       = $api->getPhotos($photosetId);
-    $photos       = $result['photos'];
-    $galleryTitle = $result['title'] ?: $galleryTitle;
+    $result             = $api->getPhotos($photosetId);
+    $photos             = $result['photos'];
+    $galleryTitle       = $result['title'] ?: $galleryTitle;
+    $info               = $api->getPhotosetInfo($photosetId);
+    $galleryDescription = $info['description'] ?? '';
 
     if ($collectionId) {
         $collections = $api->getCollections();
@@ -40,7 +43,24 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($galleryTitle) ?> — Guillaume LECOMTE</title>
+    <?php
+        $galTitleEsc = htmlspecialchars($galleryTitle);
+        $galDescClean = strip_tags($galleryDescription);
+        $metaDesc = $galDescClean
+            ? htmlspecialchars(mb_strimwidth($galDescClean, 0, 155, '…'))
+            : "Galerie « {$galTitleEsc} » — photographies de Guillaume Lecomte, photographe amateur né à Arras, vivant en Belgique.";
+        $canonicalId  = htmlspecialchars($_GET['id'] ?? '');
+    ?>
+    <title><?= $galTitleEsc ?> — Guillaume LECOMTE</title>
+    <meta name="description" content="<?= $metaDesc ?>">
+    <meta name="author" content="Guillaume Lecomte">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://guillaumelecomte.net/gallery.php?id=<?= $canonicalId ?>">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://guillaumelecomte.net/gallery.php?id=<?= $canonicalId ?>">
+    <meta property="og:title" content="<?= $galTitleEsc ?> — Guillaume LECOMTE">
+    <meta property="og:description" content="<?= $metaDesc ?>">
+    <meta property="og:locale" content="fr_FR">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -85,6 +105,9 @@ try {
 
     <?php else: ?>
     <h1 class="page-heading"><?= htmlspecialchars($galleryTitle) ?></h1>
+    <?php if ($galleryDescription): ?>
+    <div class="page-description"><?= nl2br(htmlspecialchars(strip_tags($galleryDescription))) ?></div>
+    <?php endif; ?>
     <p class="page-meta"><?= count($photos) ?> photo<?= count($photos) > 1 ? 's' : '' ?></p>
 
     <div class="photos-masonry">
@@ -107,6 +130,15 @@ try {
         <?php endforeach; ?>
     </div>
     <?php endif; ?>
+
+    <?php
+    $commentContextType = 'album';
+    $commentContextId   = $photosetId;
+    $commentReturnUrl   = '/gallery.php?id=' . urlencode($photosetId) . ($collectionId ? '&col=' . urlencode($collectionId) : '');
+    $commentError       = isset($_GET['error']);
+    require __DIR__ . '/includes/comment_list.php';
+    require __DIR__ . '/includes/comment_form.php';
+    ?>
 
 </main>
 
