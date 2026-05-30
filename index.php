@@ -17,7 +17,53 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guillaume LECOMTE — Photographies</title>
+    <title>Guillaume LECOMTE — Photographe amateur</title>
+    <meta name="description" content="Galerie photographique de Guillaume Lecomte, photographe amateur né à Arras, ayant vécu à Aubigny-en-Artois, vivant désormais en Belgique.">
+    <meta name="author" content="Guillaume Lecomte">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://guillaumelecomte.net/">
+    <link rel="sitemap" type="application/xml" href="https://guillaumelecomte.net/sitemap.xml">
+    <meta property="og:type" content="profile">
+    <meta property="og:url" content="https://guillaumelecomte.net/">
+    <meta property="og:title" content="Guillaume LECOMTE — Photographe amateur">
+    <meta property="og:description" content="Galerie photographique de Guillaume Lecomte, photographe amateur né à Arras, ayant vécu à Aubigny-en-Artois, vivant désormais en Belgique.">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="profile:first_name" content="Guillaume">
+    <meta property="profile:last_name" content="Lecomte">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfilePage",
+      "url": "https://guillaumelecomte.net/",
+      "name": "Guillaume LECOMTE — Photographe amateur",
+      "description": "Galerie photographique de Guillaume Lecomte, photographe amateur né à Arras, ayant vécu à Aubigny-en-Artois, vivant désormais en Belgique.",
+      "mainEntity": {
+        "@type": "Person",
+        "name": "Guillaume Lecomte",
+        "givenName": "Guillaume",
+        "familyName": "Lecomte",
+        "description": "Photographe amateur né à Arras (Pas-de-Calais), ayant vécu à Aubigny-en-Artois, vivant désormais en Belgique.",
+        "birthPlace": {
+          "@type": "Place",
+          "name": "Arras",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Arras",
+            "addressRegion": "Pas-de-Calais",
+            "addressCountry": "FR"
+          }
+        },
+        "homeLocation": {
+          "@type": "Place",
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "BE"
+          }
+        },
+        "url": "https://guillaumelecomte.net/"
+      }
+    }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -28,6 +74,7 @@ try {
 <section class="hero">
     <nav class="hero-nav site-nav">
         <a class="site-nav-link" href="map.php">Carte</a>
+        <a class="site-nav-link" href="guestbook.php">Livre d'or</a>
     </nav>
     <div class="hero-identity">
         <p class="hero-name-first">Guillaume</p>

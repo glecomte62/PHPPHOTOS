@@ -6,7 +6,16 @@ require_once __DIR__ . '/config.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carte — Guillaume LECOMTE</title>
+    <title>Carte des photos — Guillaume LECOMTE</title>
+    <meta name="description" content="Carte interactive des photographies géolocalisées de Guillaume Lecomte, photographe amateur né à Arras, vivant en Belgique.">
+    <meta name="author" content="Guillaume Lecomte">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://guillaumelecomte.net/map.php">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://guillaumelecomte.net/map.php">
+    <meta property="og:title" content="Carte des photos — Guillaume LECOMTE">
+    <meta property="og:description" content="Carte interactive des photographies géolocalisées de Guillaume Lecomte, photographe amateur né à Arras, vivant en Belgique.">
+    <meta property="og:locale" content="fr_FR">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -21,6 +30,7 @@ require_once __DIR__ . '/config.php';
     <a class="site-title" href="index.php"><span class="site-title-first">Guillaume</span> <span class="site-title-last">LECOMTE</span></a>
     <nav class="site-nav">
         <a class="site-nav-link active" href="map.php">Carte</a>
+        <a class="site-nav-link" href="guestbook.php">Livre d'or</a>
     </nav>
 </header>
 

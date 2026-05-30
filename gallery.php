@@ -79,6 +79,7 @@ try {
     <?php endif; ?>
     <nav class="site-nav">
         <a class="site-nav-link" href="map.php">Carte</a>
+        <a class="site-nav-link" href="guestbook.php">Livre d'or</a>
     </nav>
 </header>
 

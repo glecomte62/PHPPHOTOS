@@ -44,7 +44,17 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($collection['title'] ?? 'Collection') ?> — Guillaume LECOMTE</title>
+    <?php $colTitle = htmlspecialchars($collection['title'] ?? 'Collection'); ?>
+    <title><?= $colTitle ?> — Guillaume LECOMTE</title>
+    <meta name="description" content="Collection « <?= $colTitle ?> » — photographies de Guillaume Lecomte, photographe amateur né à Arras, vivant en Belgique.">
+    <meta name="author" content="Guillaume Lecomte">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://guillaumelecomte.net/collection.php?id=<?= htmlspecialchars($_GET['id'] ?? '') ?>">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://guillaumelecomte.net/collection.php?id=<?= htmlspecialchars($_GET['id'] ?? '') ?>">
+    <meta property="og:title" content="<?= $colTitle ?> — Guillaume LECOMTE">
+    <meta property="og:description" content="Collection « <?= $colTitle ?> » — photographies de Guillaume Lecomte, photographe amateur né à Arras, vivant en Belgique.">
+    <meta property="og:locale" content="fr_FR">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -60,6 +70,7 @@ try {
     <?php endif; ?>
     <nav class="site-nav">
         <a class="site-nav-link" href="map.php">Carte</a>
+        <a class="site-nav-link" href="guestbook.php">Livre d'or</a>
     </nav>
 </header>
 
