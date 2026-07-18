@@ -11,6 +11,7 @@ if (isset($_GET['slug'], $_GET['slug_col']) && !isset($_GET['id'])) {
         foreach ($api->getCollections() as $col) {
             if (Slug::slugify($col['title']) === $_GET['slug_col']) {
                 $_GET['col'] = $col['id'];
+                $collectionTitle = $col['title'];
                 foreach ($col['sets'] as $set) {
                     if (Slug::slugify($set['title']) === $_GET['slug']) {
                         $_GET['id'] = $set['id'];
@@ -21,7 +22,7 @@ if (isset($_GET['slug'], $_GET['slug_col']) && !isset($_GET['id'])) {
         }
     } catch (RuntimeException) {}
     if (!isset($_GET['id'])) {
-        header('Location: /', true, 301);
+        header('Location: /', true, 302);
         exit;
     }
 }
@@ -49,7 +50,7 @@ try {
     $info               = $api->getPhotosetInfo($photosetId);
     $galleryDescription = $info['description'] ?? '';
 
-    if ($collectionId) {
+    if ($collectionId && !$collectionTitle) {
         $collections = $api->getCollections();
         foreach ($collections as $col) {
             if ($col['id'] === $collectionId) {
