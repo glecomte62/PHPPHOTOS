@@ -1,6 +1,19 @@
 Options -Indexes
 RewriteEngine On
 
+# Sitemap dynamique accessible à la racine
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
+# URLs friendly : /{slug-collection}
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([a-z0-9-]+)$ collection.php?slug=$1 [L,QSA]
+
+# URLs friendly : /{slug-collection}/{slug-album}
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([a-z0-9-]+)/([a-z0-9-]+)$ gallery.php?slug_col=$1&slug=$2 [L,QSA]
+
 # Bloquer l'accès direct au .env
 <Files ".env">
     Order allow,deny
