@@ -1,6 +1,24 @@
 <?php
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/lib/FlickrAPI.php';
+require_once __DIR__ . '/lib/Slug.php';
+
+// Résolution slug → ID si URL friendly
+if (isset($_GET['slug']) && !isset($_GET['id'])) {
+    $api = new FlickrAPI(FLICKR_API_KEY, FLICKR_USER_ID);
+    try {
+        foreach ($api->getCollections() as $col) {
+            if (Slug::slugify($col['title']) === $_GET['slug']) {
+                $_GET['id'] = $col['id'];
+                break;
+            }
+        }
+    } catch (RuntimeException) {}
+    if (!isset($_GET['id'])) {
+        header('Location: /', true, 301);
+        exit;
+    }
+}
 
 $collectionId = $_GET['id'] ?? '';
 if (!$collectionId) {
@@ -12,6 +30,7 @@ $api        = new FlickrAPI(FLICKR_API_KEY, FLICKR_USER_ID);
 $error      = null;
 $collection = null;
 $photosets  = [];
+$colSlug    = '';
 
 try {
     $collections = $api->getCollections();
@@ -25,6 +44,7 @@ try {
     if (!$collection) {
         throw new RuntimeException('Collection introuvable.');
     }
+    $colSlug = Slug::slugify($collection['title']);
 
     $ids = array_column($collection['sets'] ?? [], 'id');
     $infoMap = $api->getPhotosetsInfo($ids);
@@ -42,6 +62,13 @@ try {
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-N3XTKBXL');</script>
+    <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php $colTitle = htmlspecialchars($collection['title'] ?? 'Collection'); ?>
@@ -49,9 +76,9 @@ try {
     <meta name="description" content="Collection « <?= $colTitle ?> » — photographies de Guillaume Lecomte, photographe amateur né à Arras, vivant en Belgique.">
     <meta name="author" content="Guillaume Lecomte">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://guillaumelecomte.net/collection.php?id=<?= htmlspecialchars($_GET['id'] ?? '') ?>">
+    <link rel="canonical" href="https://guillaumelecomte.net/<?= htmlspecialchars($colSlug) ?>">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://guillaumelecomte.net/collection.php?id=<?= htmlspecialchars($_GET['id'] ?? '') ?>">
+    <meta property="og:url" content="https://guillaumelecomte.net/<?= htmlspecialchars($colSlug) ?>">
     <meta property="og:title" content="<?= $colTitle ?> — Guillaume LECOMTE">
     <meta property="og:description" content="Collection « <?= $colTitle ?> » — photographies de Guillaume Lecomte, photographe amateur né à Arras, vivant en Belgique.">
     <meta property="og:locale" content="fr_FR">
@@ -61,6 +88,9 @@ try {
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N3XTKBXL" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 
 <header class="site-header">
     <a class="site-title" href="index.php"><span class="site-title-first">Guillaume</span> <span class="site-title-last">LECOMTE</span></a>
@@ -90,7 +120,7 @@ try {
     <?php else: ?>
     <div class="galleries-grid">
         <?php foreach ($photosets as $set): ?>
-        <a class="gallery-card" href="gallery.php?id=<?= htmlspecialchars($set['id']) ?>&col=<?= htmlspecialchars($collectionId) ?>">
+        <a class="gallery-card" href="/<?= htmlspecialchars($colSlug) ?>/<?= htmlspecialchars(Slug::slugify($set['title'])) ?>">
             <?php if ($set['cover_url']): ?>
             <img
                 class="gallery-card-cover"
