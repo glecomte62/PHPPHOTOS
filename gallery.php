@@ -101,8 +101,9 @@ $albumSlug = Slug::slugify($galleryTitle);
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -217,6 +218,6 @@ $albumSlug = Slug::slugify($galleryTitle);
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="js/lightbox.js"></script>
+<script src="/js/lightbox.js"></script>
 </body>
 </html>
