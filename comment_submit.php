@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $returnUrl = $_POST['return_url'] ?? 'index.php';
-if (!preg_match('#^/#', $returnUrl)) {
+if (!preg_match('#^/(?!/)#', $returnUrl)) {
     $returnUrl = 'index.php';
 }
 
@@ -82,5 +82,6 @@ try {
     // échec email ne bloque pas la soumission
 }
 
-header('Location: ' . $returnUrl . '#comments');
+$separator = str_contains($returnUrl, '?') ? '&' : '?';
+header('Location: ' . $returnUrl . $separator . 'success=1#comments');
 exit;

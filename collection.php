@@ -16,7 +16,7 @@ if (isset($_GET['slug']) && !isset($_GET['id'])) {
         }
     } catch (RuntimeException) {}
     if (!isset($_GET['id'])) {
-        header('Location: /', true, 301);
+        header('Location: /', true, 302);
         exit;
     }
 }
