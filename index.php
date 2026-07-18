@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/lib/FlickrAPI.php';
+require_once __DIR__ . '/lib/Slug.php';
 
 $api         = new FlickrAPI(FLICKR_API_KEY, FLICKR_USER_ID);
 $error       = null;
@@ -15,6 +16,13 @@ try {
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-N3XTKBXL');</script>
+    <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guillaume LECOMTE — Photographe amateur</title>
@@ -70,6 +78,9 @@ try {
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N3XTKBXL" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 
 <section class="hero">
     <nav class="hero-nav site-nav">
@@ -100,7 +111,7 @@ try {
     <?php else: ?>
     <div class="galleries-grid">
         <?php foreach ($collections as $col): ?>
-        <a class="gallery-card" href="collection.php?id=<?= htmlspecialchars($col['id']) ?>">
+        <a class="gallery-card" href="/<?= htmlspecialchars(Slug::slugify($col['title'])) ?>">
             <?php if ($col['cover_url']): ?>
             <img
                 class="gallery-card-cover"
