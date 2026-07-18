@@ -1,6 +1,30 @@
 <?php
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/lib/FlickrAPI.php';
+require_once __DIR__ . '/lib/Slug.php';
+
+$api = new FlickrAPI(FLICKR_API_KEY, FLICKR_USER_ID);
+
+// Résolution slug → ID si URL friendly
+if (isset($_GET['slug'], $_GET['slug_col']) && !isset($_GET['id'])) {
+    try {
+        foreach ($api->getCollections() as $col) {
+            if (Slug::slugify($col['title']) === $_GET['slug_col']) {
+                $_GET['col'] = $col['id'];
+                foreach ($col['sets'] as $set) {
+                    if (Slug::slugify($set['title']) === $_GET['slug']) {
+                        $_GET['id'] = $set['id'];
+                        break 2;
+                    }
+                }
+            }
+        }
+    } catch (RuntimeException) {}
+    if (!isset($_GET['id'])) {
+        header('Location: /', true, 301);
+        exit;
+    }
+}
 
 $photosetId = $_GET['id'] ?? '';
 
@@ -11,7 +35,7 @@ if (empty($photosetId) || !preg_match('/^\d+$/', $photosetId)) {
 
 $collectionId = $_GET['col'] ?? '';
 
-$api    = new FlickrAPI(FLICKR_API_KEY, FLICKR_USER_ID);
+
 $error  = null;
 $photos = [];
 $galleryTitle       = 'Galerie';
@@ -37,10 +61,20 @@ try {
 } catch (RuntimeException $e) {
     $error = $e->getMessage();
 }
+
+$colSlug   = $collectionTitle ? Slug::slugify($collectionTitle) : '';
+$albumSlug = Slug::slugify($galleryTitle);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-N3XTKBXL');</script>
+    <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php
@@ -49,15 +83,17 @@ try {
         $metaDesc = $galDescClean
             ? htmlspecialchars(mb_strimwidth($galDescClean, 0, 155, '…'))
             : "Galerie « {$galTitleEsc} » — photographies de Guillaume Lecomte, photographe amateur né à Arras, vivant en Belgique.";
-        $canonicalId  = htmlspecialchars($_GET['id'] ?? '');
+        $friendlyUrl = ($colSlug && $albumSlug)
+            ? 'https://guillaumelecomte.net/' . htmlspecialchars($colSlug) . '/' . htmlspecialchars($albumSlug)
+            : 'https://guillaumelecomte.net/gallery.php?id=' . htmlspecialchars($_GET['id'] ?? '');
     ?>
     <title><?= $galTitleEsc ?> — Guillaume LECOMTE</title>
     <meta name="description" content="<?= $metaDesc ?>">
     <meta name="author" content="Guillaume Lecomte">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://guillaumelecomte.net/gallery.php?id=<?= $canonicalId ?>">
+    <link rel="canonical" href="<?= $friendlyUrl ?>">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://guillaumelecomte.net/gallery.php?id=<?= $canonicalId ?>">
+    <meta property="og:url" content="<?= $friendlyUrl ?>">
     <meta property="og:title" content="<?= $galTitleEsc ?> — Guillaume LECOMTE">
     <meta property="og:description" content="<?= $metaDesc ?>">
     <meta property="og:locale" content="fr_FR">
@@ -68,6 +104,9 @@ try {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N3XTKBXL" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 
 <header class="site-header">
     <a class="site-title" href="index.php"><span class="site-title-first">Guillaume</span> <span class="site-title-last">LECOMTE</span></a>
@@ -86,7 +125,7 @@ try {
 <nav class="breadcrumb">
     <a href="index.php">Collections</a>
     <?php if ($collectionTitle && $collectionId): ?>
-    &nbsp;/&nbsp;<a href="collection.php?id=<?= htmlspecialchars($collectionId) ?>"><?= htmlspecialchars($collectionTitle) ?></a>
+    &nbsp;/&nbsp;<a href="/<?= htmlspecialchars($colSlug) ?>"><?= htmlspecialchars($collectionTitle) ?></a>
     <?php endif; ?>
     &nbsp;/&nbsp;<?= htmlspecialchars($galleryTitle) ?>
 </nav>
@@ -135,8 +174,11 @@ try {
     <?php
     $commentContextType = 'album';
     $commentContextId   = $photosetId;
-    $commentReturnUrl   = '/gallery.php?id=' . urlencode($photosetId) . ($collectionId ? '&col=' . urlencode($collectionId) : '');
+    $commentReturnUrl   = ($colSlug && $albumSlug)
+        ? '/' . $colSlug . '/' . $albumSlug
+        : '/gallery.php?id=' . urlencode($photosetId) . ($collectionId ? '&col=' . urlencode($collectionId) : '');
     $commentError       = isset($_GET['error']);
+    $commentSuccess     = isset($_GET['success']);
     require __DIR__ . '/includes/comment_list.php';
     require __DIR__ . '/includes/comment_form.php';
     ?>
