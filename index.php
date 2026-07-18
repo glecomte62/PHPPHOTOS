@@ -16,6 +16,8 @@ try {
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -23,8 +25,6 @@ try {
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-N3XTKBXL');</script>
     <!-- End Google Tag Manager -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guillaume LECOMTE — Photographe amateur</title>
     <meta name="description" content="Galerie photographique de Guillaume Lecomte, photographe amateur né à Arras, ayant vécu à Aubigny-en-Artois, vivant désormais en Belgique.">
     <meta name="author" content="Guillaume Lecomte">

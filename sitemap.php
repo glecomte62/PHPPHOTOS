@@ -9,8 +9,9 @@ $api  = new FlickrAPI(FLICKR_API_KEY, FLICKR_USER_ID);
 $urls = [];
 
 // Pages statiques
-$urls[] = ['loc' => $base . '/',          'changefreq' => 'weekly',  'priority' => '1.0'];
-$urls[] = ['loc' => $base . '/map.php',   'changefreq' => 'monthly', 'priority' => '0.6'];
+$urls[] = ['loc' => $base . '/',               'changefreq' => 'weekly',  'priority' => '1.0'];
+$urls[] = ['loc' => $base . '/map.php',        'changefreq' => 'monthly', 'priority' => '0.6'];
+$urls[] = ['loc' => $base . '/guestbook.php',  'changefreq' => 'monthly', 'priority' => '0.5'];
 
 // Collections et galeries depuis Flickr
 try {
