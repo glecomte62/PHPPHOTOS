@@ -3,9 +3,10 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/lib/FlickrAPI.php';
 require_once __DIR__ . '/lib/Slug.php';
 
+$api = new FlickrAPI(FLICKR_API_KEY, FLICKR_USER_ID);
+
 // Résolution slug → ID si URL friendly
 if (isset($_GET['slug']) && !isset($_GET['id'])) {
-    $api = new FlickrAPI(FLICKR_API_KEY, FLICKR_USER_ID);
     try {
         foreach ($api->getCollections() as $col) {
             if (Slug::slugify($col['title']) === $_GET['slug']) {
@@ -26,7 +27,6 @@ if (!$collectionId) {
     exit;
 }
 
-$api        = new FlickrAPI(FLICKR_API_KEY, FLICKR_USER_ID);
 $error      = null;
 $collection = null;
 $photosets  = [];
