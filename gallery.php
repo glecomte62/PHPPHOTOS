@@ -150,7 +150,11 @@ $albumSlug = Slug::slugify($galleryTitle);
     <?php if ($galleryDescription): ?>
     <div class="page-description"><?= nl2br(htmlspecialchars(strip_tags($galleryDescription))) ?></div>
     <?php endif; ?>
-    <p class="page-meta"><?= count($photos) ?> photo<?= count($photos) > 1 ? 's' : '' ?></p>
+    <p class="page-meta">
+        <?= count($photos) ?> photo<?= count($photos) > 1 ? 's' : '' ?>
+        &nbsp;·&nbsp;
+        <a class="flickr-link" href="https://www.flickr.com/photos/<?= htmlspecialchars(FLICKR_USER_ID) ?>/albums/<?= htmlspecialchars($photosetId) ?>" target="_blank" rel="noopener">Voir sur Flickr</a>
+    </p>
 
     <div class="photos-masonry">
         <?php foreach ($photos as $photo): ?>
