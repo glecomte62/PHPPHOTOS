@@ -62,12 +62,12 @@ class FlickrAPI
      * Retourne la liste des galeries (photosets) de l'utilisateur.
      * Chaque élément : ['id', 'title', 'cover_url', 'photo_count']
      */
-    public function getPhotosets(): array
+    public function getPhotosets(int $limit = 0): array
     {
         $data = $this->request([
             'method'  => 'flickr.photosets.getList',
             'user_id' => $this->userId,
-            'per_page' => 500,
+            'per_page' => $limit > 0 ? $limit : 500,
             'primary_photo_extras' => 'url_l,url_m',
         ]);
 
