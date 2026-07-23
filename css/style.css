@@ -337,6 +337,10 @@ a { color: inherit; text-decoration: none; }
     gap: 1.2rem;
 }
 
+.recent-albums-grid .gallery-card-cover {
+    aspect-ratio: 3 / 2;
+}
+
 /* ============================
    GRILLE PHOTOS (masonry)
    ============================ */
