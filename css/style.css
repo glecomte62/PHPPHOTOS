@@ -338,7 +338,8 @@ a { color: inherit; text-decoration: none; }
 }
 
 .recent-albums-grid .gallery-card-cover {
-    aspect-ratio: 3 / 2;
+    aspect-ratio: unset;
+    height: 90px;
 }
 
 /* ============================
