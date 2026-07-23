@@ -24,10 +24,12 @@ foreach ($collections as $col) {
     }
 }
 
-try {
-    $recentAlbums = $api->getPhotosets(6);
-} catch (RuntimeException $e) {
-    // silencieux : la section est absente si l'API échoue
+if ($error === null) {
+    try {
+        $recentAlbums = $api->getPhotosets(6);
+    } catch (RuntimeException $e) {
+        // silencieux : la section est absente si l'API échoue
+    }
 }
 ?>
 <!DOCTYPE html>
