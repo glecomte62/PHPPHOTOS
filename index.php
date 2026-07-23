@@ -126,6 +126,37 @@ try {
     </div>
 
     <?php else: ?>
+    <?php if (!empty($recentAlbums)): ?>
+    <section class="recent-albums">
+        <h2 class="recent-albums-title">Derniers albums</h2>
+        <div class="recent-albums-grid">
+            <?php foreach ($recentAlbums as $album):
+                $albumSlug = Slug::slugify($album['title']);
+                $colSlug   = $setToColSlug[$album['id']] ?? null;
+                $href      = $colSlug
+                    ? '/' . htmlspecialchars($colSlug) . '/' . htmlspecialchars($albumSlug)
+                    : 'gallery.php?id=' . htmlspecialchars($album['id']);
+            ?>
+            <a class="gallery-card" href="<?= $href ?>">
+                <?php if ($album['cover_url']): ?>
+                <img
+                    class="gallery-card-cover"
+                    src="<?= htmlspecialchars($album['cover_url']) ?>"
+                    alt="<?= htmlspecialchars($album['title']) ?>"
+                    loading="lazy"
+                >
+                <?php else: ?>
+                <div class="gallery-card-cover gallery-card-no-cover"></div>
+                <?php endif; ?>
+                <div class="gallery-card-info">
+                    <div class="gallery-card-title"><?= htmlspecialchars($album['title']) ?></div>
+                    <div class="gallery-card-count"><?= $album['photo_count'] ?> photo<?= $album['photo_count'] > 1 ? 's' : '' ?></div>
+                </div>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </section>
+    <?php endif; ?>
     <div class="galleries-grid">
         <?php foreach ($collections as $col): ?>
         <a class="gallery-card" href="/<?= htmlspecialchars(Slug::slugify($col['title'])) ?>">
