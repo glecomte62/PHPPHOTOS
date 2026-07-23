@@ -315,6 +315,29 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ============================
+   SECTION DERNIERS ALBUMS
+   ============================ */
+.recent-albums {
+    margin-bottom: 3rem;
+}
+
+.recent-albums-title {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+.recent-albums-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1.2rem;
+}
+
+/* ============================
    GRILLE PHOTOS (masonry)
    ============================ */
 .photos-masonry {
@@ -663,11 +686,13 @@ a { color: inherit; text-decoration: none; }
    ============================ */
 @media (max-width: 1024px) {
     .galleries-grid { grid-template-columns: repeat(2, 1fr); }
+    .recent-albums-grid { grid-template-columns: repeat(3, 1fr); }
     .photos-masonry { columns: 3; }
 }
 
 @media (max-width: 768px) {
     .galleries-grid { grid-template-columns: 1fr; }
+    .recent-albums-grid { grid-template-columns: repeat(2, 1fr); }
     .photos-masonry { columns: 2; }
 }
 
@@ -679,6 +704,8 @@ a { color: inherit; text-decoration: none; }
     .lightbox-overlay.panel-open .lightbox-info {
         right: 0;
     }
+
+    .recent-albums-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 480px) {
