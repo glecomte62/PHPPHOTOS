@@ -12,6 +12,23 @@ try {
 } catch (RuntimeException $e) {
     $error = $e->getMessage();
 }
+
+$recentAlbums = [];
+$setToColSlug = [];
+
+// Construire le map set_id → colSlug à partir des collections déjà chargées
+foreach ($collections as $col) {
+    $colSlug = Slug::slugify($col['title']);
+    foreach ($col['sets'] as $set) {
+        $setToColSlug[$set['id']] = $colSlug;
+    }
+}
+
+try {
+    $recentAlbums = $api->getPhotosets(6);
+} catch (RuntimeException $e) {
+    // silencieux : la section est absente si l'API échoue
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
