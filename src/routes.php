@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+use App\Controllers\Admin\AlbumController;
 use App\Controllers\Admin\AuthController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\ThemeController;
@@ -24,6 +25,14 @@ $router->post('/admin/themes/reorder', static fn () => (new ThemeController($vie
 $router->get('/admin/themes/{id:\d+}', static fn (string $id) => (new ThemeController($view))->edit((int) $id));
 $router->post('/admin/themes/{id:\d+}', static fn (string $id) => (new ThemeController($view))->update((int) $id));
 $router->post('/admin/themes/{id:\d+}/delete', static fn (string $id) => (new ThemeController($view))->delete((int) $id));
+$router->get('/admin/albums', static fn () => (new AlbumController($view))->index());
+$router->get('/admin/albums/new', static fn () => (new AlbumController($view))->create());
+$router->post('/admin/albums', static fn () => (new AlbumController($view))->store());
+$router->post('/admin/albums/reorder', static fn () => (new AlbumController($view))->reorder());
+$router->get('/admin/albums/{id:\d+}', static fn (string $id) => (new AlbumController($view))->edit((int) $id));
+$router->post('/admin/albums/{id:\d+}', static fn (string $id) => (new AlbumController($view))->update((int) $id));
+$router->post('/admin/albums/{id:\d+}/delete', static fn (string $id) => (new AlbumController($view))->delete((int) $id));
+$router->get('/admin/albums/{id:\d+}/photos', static fn (string $id) => (new AlbumController($view))->photos((int) $id));
 
 // --- Public ---
 $router->get('/', static fn () => $public()->home());
