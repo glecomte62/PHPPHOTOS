@@ -2,10 +2,13 @@
   const el = document.getElementById('map');
   if (!el || !window.L) return;
   const map = L.map(el).setView([46.6, 2.4], 6);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, © <a href="https://carto.com/attributions">CARTO</a>',
-    maxZoom: 19,
+  // Fond Esri « Light Gray Canvas » (gratuit, sans clé) + couche des noms de lieux
+  const esri = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
+  L.tileLayer(`${esri}World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {
+    attribution: 'Fond de carte © Esri — Esri, HERE, Garmin, © contributeurs OpenStreetMap',
+    maxZoom: 16,
   }).addTo(map);
+  L.tileLayer(`${esri}World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, { maxZoom: 16 }).addTo(map);
   const cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 50 });
 
   fetch('/carte.json')
