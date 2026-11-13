@@ -24,7 +24,10 @@ $canonical = absolute_url((string) (parse_url($_SERVER['REQUEST_URI'] ?? '/', PH
 <meta name="twitter:card" content="summary_large_image">
 <?php endif; ?>
 <meta name="theme-color" content="#f4f1ec">
-<link rel="icon" href="<?= e(asset('img/favicon.svg')) ?>" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="<?= e(asset('img/favicon-32.png')) ?>" type="image/png" sizes="32x32">
+<link rel="icon" href="<?= e(asset('img/icon-512.png')) ?>" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
