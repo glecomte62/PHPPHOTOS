@@ -20,9 +20,10 @@ final class ContactForm
      */
     public static function validate(array $input, string $key, int $now): array
     {
-        $name = trim((string) ($input['name'] ?? ''));
-        $email = trim((string) ($input['email'] ?? ''));
-        $message = trim((string) ($input['message'] ?? ''));
+        $field = static fn (string $k): string => is_string($input[$k] ?? null) ? trim($input[$k]) : '';
+        $name = $field('name');
+        $email = $field('email');
+        $message = $field('message');
 
         $errors = [];
         if ($name === '' || mb_strlen($name) > 100) {
@@ -36,8 +37,13 @@ final class ContactForm
             $errors['message'] = 'Votre message doit contenir entre 20 et 5000 caractères.';
         }
 
-        $spam = trim((string) ($input['website'] ?? '')) !== ''
-            || !self::tokenIsValid((string) ($input['ts'] ?? ''), $key, $now);
+        $keyOk = strlen($key) >= 32;
+        if (!$keyOk) {
+            error_log('APP_KEY manquante ou trop courte');
+        }
+        $spam = !$keyOk
+            || $field('website') !== ''
+            || !self::tokenIsValid($field('ts'), $key, $now);
 
         return ['data' => ['name' => $name, 'email' => $email, 'message' => $message], 'errors' => $errors, 'spam' => $spam];
     }

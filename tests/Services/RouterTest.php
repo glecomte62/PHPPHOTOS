@@ -51,6 +51,7 @@ final class RouterTest extends TestCase
         self::assertNull($this->router->match('POST', '/carte'));
         self::assertNull($this->router->match('GET', '/Majuscules'));
         self::assertNull($this->router->match('GET', '/a/b/c/d'));
+        self::assertNull($this->router->match('GET', "/carte\n"));
     }
 
     public function testDispatchCallsNotFound(): void

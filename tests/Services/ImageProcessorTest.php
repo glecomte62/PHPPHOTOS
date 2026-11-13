@@ -73,4 +73,16 @@ final class ImageProcessorTest extends TestCase
         ImageProcessor::deleteVariants($this->dir, 'del');
         self::assertSame([], glob($this->dir . '/del-*'));
     }
+
+    public function testRejectsInvalidKey(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        (new ImageProcessor())->process(self::FIX . 'no-exif.jpg', $this->dir, '../evil', 1);
+    }
+
+    public function testAcceptsHyphenatedKey(): void
+    {
+        (new ImageProcessor())->process(self::FIX . 'no-exif.jpg', $this->dir, 'banner-1a2b3c4d', 1);
+        self::assertFileExists("{$this->dir}/banner-1a2b3c4d-480.jpg");
+    }
 }

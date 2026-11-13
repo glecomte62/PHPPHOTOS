@@ -23,6 +23,12 @@ final class HtmlSanitizerTest extends TestCase
         );
     }
 
+    public function testRejectsProtocolRelativeAndBackslashLinks(): void
+    {
+        self::assertSame('<p><a>x</a></p>', HtmlSanitizer::clean('<p><a href="//evil.com/x">x</a></p>'));
+        self::assertSame('<p><a>x</a></p>', HtmlSanitizer::clean('<p><a href="/\\evil.com">x</a></p>'));
+    }
+
     public function testParagraphsFromPlainText(): void
     {
         self::assertSame("<p>Un</p>\n<p>Deux<br>trois</p>", HtmlSanitizer::paragraphs("Un\n\nDeux\ntrois"));

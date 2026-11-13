@@ -50,4 +50,23 @@ final class ExifReaderTest extends TestCase
         self::assertEqualsWithDelta(-33.8, ExifReader::gps(['33/1', '48/1', '0/1'], 'S'), 0.0001);
         self::assertNull(ExifReader::gps(['0/1', '0/1', '0/1'], 'N'));
     }
+
+    public function testShutterDecimalBetweenPointThreeAndOne(): void
+    {
+        self::assertSame('0.4 s', ExifReader::shutter(0.4));
+        self::assertSame('1/4 s', ExifReader::shutter(0.25));
+    }
+
+    public function testGpsRejectsOutOfRange(): void
+    {
+        self::assertNull(ExifReader::gps(['200/1', '0/1', '0/1'], 'E'));
+        self::assertEqualsWithDelta(170.0, ExifReader::gps(['170/1', '0/1', '0/1'], 'E'), 0.0001);
+    }
+
+    public function testRejectsInvalidDate(): void
+    {
+        $m = new \ReflectionMethod(ExifReader::class, 'date');
+        self::assertNull($m->invoke(null, '2025:13:45 25:61:61'));
+        self::assertSame('2025-06-14 10:32:05', $m->invoke(null, '2025:06:14 10:32:05'));
+    }
 }

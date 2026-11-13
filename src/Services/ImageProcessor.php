@@ -23,6 +23,9 @@ final class ImageProcessor
      */
     public function process(string $source, string $destDir, string $key, int $orientation = 1, array $widths = self::WIDTHS): array
     {
+        if (!preg_match('/^[a-z0-9-]+$/', $key)) {
+            throw new \InvalidArgumentException('Clé de fichier invalide.');
+        }
         $info = @getimagesize($source);
         if ($info === false || $info[2] !== IMAGETYPE_JPEG) {
             throw new ImageException('Le fichier n\'est pas une image JPEG valide.');
@@ -35,9 +38,12 @@ final class ImageProcessor
         if ($img === false) {
             throw new ImageException('Impossible de lire l\'image.');
         }
-        $img = $this->orient($img, $orientation);
-        $w = imagesx($img);
-        $h = imagesy($img);
+        $sw = imagesx($img);
+        $sh = imagesy($img);
+        // Orientations 5 à 8 : l'image finale a la largeur et la hauteur inversées.
+        $swapped = $orientation >= 5 && $orientation <= 8;
+        $w = $swapped ? $sh : $sw;
+        $h = $swapped ? $sw : $sh;
 
         if (!is_dir($destDir) && !mkdir($destDir, 0775, true) && !is_dir($destDir)) {
             throw new ImageException('Dossier de destination inaccessible.');
@@ -48,20 +54,24 @@ final class ImageProcessor
             foreach ($widths as $target) {
                 $tw = min($target, $w);
                 $th = max(1, (int) round($h * $tw / $w));
-                $dst = imagecreatetruecolor($tw, $th);
-                imagecopyresampled($dst, $img, 0, 0, 0, 0, $tw, $th, $w, $h);
+                // Redimensionner d'abord (sans rotation), puis orienter la petite image.
+                $cw = $swapped ? $th : $tw;
+                $ch = $swapped ? $tw : $th;
+                $canvas = imagecreatetruecolor($cw, $ch);
+                imagecopyresampled($canvas, $img, 0, 0, 0, 0, $cw, $ch, $sw, $sh);
+                $dst = $this->orient($canvas, $orientation);
                 $base = $destDir . '/' . $key . '-' . $target;
 
+                $written[] = $base . '.webp';
                 if (!imagewebp($dst, $base . '.webp', $this->webpQuality)) {
                     throw new ImageException('Écriture WebP impossible.');
                 }
-                $written[] = $base . '.webp';
 
                 imageinterlace($dst, true);
+                $written[] = $base . '.jpg';
                 if (!imagejpeg($dst, $base . '.jpg', $this->jpegQuality)) {
                     throw new ImageException('Écriture JPEG impossible.');
                 }
-                $written[] = $base . '.jpg';
                 $dst = null;
             }
         } catch (\Throwable $e) {
@@ -92,14 +102,23 @@ final class ImageProcessor
         // imagerotate : angle positif = sens anti-horaire
         return match ($orientation) {
             2 => $this->flip($img, IMG_FLIP_HORIZONTAL),
-            3 => imagerotate($img, 180, 0),
+            3 => $this->rotate($img, 180),
             4 => $this->flip($img, IMG_FLIP_VERTICAL),
-            5 => $this->flip(imagerotate($img, -90, 0), IMG_FLIP_HORIZONTAL),
-            6 => imagerotate($img, -90, 0),
-            7 => $this->flip(imagerotate($img, 90, 0), IMG_FLIP_HORIZONTAL),
-            8 => imagerotate($img, 90, 0),
+            5 => $this->flip($this->rotate($img, -90), IMG_FLIP_HORIZONTAL),
+            6 => $this->rotate($img, -90),
+            7 => $this->flip($this->rotate($img, 90), IMG_FLIP_HORIZONTAL),
+            8 => $this->rotate($img, 90),
             default => $img,
         };
+    }
+
+    private function rotate(\GdImage $img, int $angle): \GdImage
+    {
+        $rotated = imagerotate($img, $angle, 0);
+        if ($rotated === false) {
+            throw new ImageException('Rotation de l\'image impossible.');
+        }
+        return $rotated;
     }
 
     private function flip(\GdImage $img, int $mode): \GdImage

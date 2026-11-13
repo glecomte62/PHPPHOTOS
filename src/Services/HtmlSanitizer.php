@@ -85,7 +85,7 @@ final class HtmlSanitizer
                 $name = strtolower($attr->name);
                 if (!in_array($name, self::ALLOWED[$tag], true)) {
                     $child->removeAttribute($attr->name);
-                } elseif ($name === 'href' && !preg_match('#^(https?://|mailto:|/)#i', trim($attr->value))) {
+                } elseif ($name === 'href' && !preg_match('#^(https?://|mailto:|/(?![/\\\\]))#i', trim($attr->value))) {
                     $child->removeAttribute($attr->name);
                 }
             }

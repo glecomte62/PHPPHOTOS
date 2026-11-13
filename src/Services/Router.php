@@ -25,7 +25,7 @@ final class Router
             static fn (array $m): string => '(?P<' . $m[1] . '>' . ($m[2] ?? '[a-z0-9-]+') . ')',
             $pattern
         );
-        $this->routes[] = [$method, '#^' . $regex . '$#', $handler];
+        $this->routes[] = [$method, '#^' . $regex . '$#D', $handler];
     }
 
     /** @return array{0: callable, 1: array<string, string>}|null */

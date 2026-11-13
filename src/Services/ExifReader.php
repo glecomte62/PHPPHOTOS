@@ -18,6 +18,7 @@ final class ExifReader
         $focal = self::rational($data['FocalLength'] ?? null);
         $fnumber = self::rational($data['FNumber'] ?? null);
         $orientation = (int) ($data['Orientation'] ?? 1);
+        $lat = self::gps($data['GPSLatitude'] ?? null, (string) ($data['GPSLatitudeRef'] ?? 'N'));
 
         return [
             'taken_at' => self::date($data['DateTimeOriginal'] ?? $data['DateTime'] ?? null),
@@ -27,7 +28,7 @@ final class ExifReader
             'aperture' => $fnumber ? self::aperture($fnumber) : null,
             'shutter' => self::shutter(self::rational($data['ExposureTime'] ?? null)),
             'iso' => self::iso($data['ISOSpeedRatings'] ?? $data['PhotographicSensitivity'] ?? null),
-            'lat' => self::gps($data['GPSLatitude'] ?? null, (string) ($data['GPSLatitudeRef'] ?? 'N')),
+            'lat' => $lat !== null && abs($lat) <= 90 ? $lat : null,
             'lng' => self::gps($data['GPSLongitude'] ?? null, (string) ($data['GPSLongitudeRef'] ?? 'E')),
             'orientation' => $orientation >= 1 && $orientation <= 8 ? $orientation : 1,
         ];
@@ -52,7 +53,7 @@ final class ExifReader
         if ($seconds === null || $seconds <= 0) {
             return null;
         }
-        return $seconds >= 1 ? self::trimNumber($seconds) . ' s' : '1/' . (int) round(1 / $seconds) . ' s';
+        return $seconds >= 0.3 ? self::trimNumber($seconds) . ' s' : '1/' . (int) round(1 / $seconds) . ' s';
     }
 
     public static function aperture(float $f): string
@@ -73,7 +74,7 @@ final class ExifReader
             return null;
         }
         $value = $deg + $min / 60 + $sec / 3600;
-        if ($value == 0.0) {
+        if ($value == 0.0 || $value > 180) {
             return null;
         }
         return round(in_array(strtoupper($ref), ['S', 'W'], true) ? -$value : $value, 7);
@@ -100,7 +101,11 @@ final class ExifReader
             return null;
         }
         $d = \DateTimeImmutable::createFromFormat('Y:m:d H:i:s', $value);
-        return $d ? $d->format('Y-m-d H:i:s') : null;
+        $errors = \DateTimeImmutable::getLastErrors();
+        if (!$d || ($errors !== false && ($errors['warning_count'] > 0 || $errors['error_count'] > 0))) {
+            return null;
+        }
+        return $d->format('Y-m-d H:i:s');
     }
 
     private static function iso(mixed $value): ?int
