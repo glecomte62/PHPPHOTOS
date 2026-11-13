@@ -9,6 +9,7 @@ use App\Models\Photo;
 use App\Models\Setting;
 use App\Models\Theme;
 use App\Services\Auth;
+use App\Services\Env;
 use App\Services\PresentationImages;
 
 final class PublicController extends Controller
@@ -173,5 +174,33 @@ final class PublicController extends Controller
             ],
             'page' => $page,
         ]);
+    }
+
+    public function sitemap(): void
+    {
+        $urls = ['/', '/presentation', '/carte', '/contact'];
+        foreach (Theme::visible() as $t) {
+            $urls[] = '/' . $t['slug'];
+        }
+        foreach (Album::allPublished() as $a) {
+            $urls[] = '/' . $a['theme_slug'] . '/' . $a['slug'];
+        }
+        header('Content-Type: application/xml; charset=utf-8');
+        echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        foreach ($urls as $u) {
+            echo '  <url><loc>' . e(absolute_url($u)) . "</loc></url>\n";
+        }
+        echo '</urlset>';
+    }
+
+    public function robots(): void
+    {
+        header('Content-Type: text/plain; charset=utf-8');
+        if (Env::get('APP_ENV') !== 'prod') {
+            echo "User-agent: *\nDisallow: /\n";
+            return;
+        }
+        echo "User-agent: *\nDisallow: /admin\n\nSitemap: " . absolute_url('/sitemap.xml') . "\n";
     }
 }
