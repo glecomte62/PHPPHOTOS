@@ -27,7 +27,16 @@ final class PublicController extends Controller
         }
 
         $this->render('public/home', [
-            'meta' => ['image' => $hero ? media_path((string) $hero['file_key'], 1280, 'jpg') : null],
+            'meta' => [
+                'image' => $hero ? media_path((string) $hero['file_key'], 1280, 'jpg') : null,
+                'jsonld' => [
+                    '@context' => 'https://schema.org',
+                    '@graph' => [
+                        ['@type' => 'WebSite', 'name' => 'Guillaume Lecomte — Photographe', 'url' => absolute_url('/'), 'inLanguage' => 'fr-FR'],
+                        ['@type' => 'Person', 'name' => 'Guillaume Lecomte', 'jobTitle' => 'Photographe amateur et pilote ULM', 'url' => absolute_url('/presentation')],
+                    ],
+                ],
+            ],
             'hero' => $hero,
             'tagline' => (string) Setting::get('site_tagline', 'Photographe & pilote ULM'),
             'featured' => $featured,
@@ -178,18 +187,31 @@ final class PublicController extends Controller
 
     public function sitemap(): void
     {
-        $urls = ['/', '/presentation', '/carte', '/contact'];
+        /** @var list<array{loc: string, lastmod?: string, images?: list<array{loc: string, title: string}>}> $entries */
+        $entries = [['loc' => '/'], ['loc' => '/presentation'], ['loc' => '/carte'], ['loc' => '/contact']];
         foreach (Theme::visible() as $t) {
-            $urls[] = '/' . $t['slug'];
+            $entries[] = ['loc' => '/' . $t['slug'], 'lastmod' => (string) $t['updated_at']];
         }
         foreach (Album::allPublished() as $a) {
-            $urls[] = '/' . $a['theme_slug'] . '/' . $a['slug'];
+            $images = array_map(static fn (array $p): array => [
+                'loc' => media_url((string) $p['file_key'], 1280, 'jpg'),
+                'title' => photo_label((string) $p['title'], (string) $a['title']),
+            ], Photo::forAlbum((int) $a['id']));
+            $entries[] = ['loc' => '/' . $a['theme_slug'] . '/' . $a['slug'], 'lastmod' => (string) $a['updated_at'], 'images' => $images];
         }
+
         header('Content-Type: application/xml; charset=utf-8');
         echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-        echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
-        foreach ($urls as $u) {
-            echo '  <url><loc>' . e(absolute_url($u)) . "</loc></url>\n";
+        echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n";
+        foreach ($entries as $entry) {
+            echo '  <url><loc>' . e(absolute_url($entry['loc'])) . '</loc>';
+            if (!empty($entry['lastmod']) && ($t = strtotime($entry['lastmod'])) !== false) {
+                echo '<lastmod>' . date('Y-m-d', $t) . '</lastmod>';
+            }
+            foreach ($entry['images'] ?? [] as $img) {
+                echo '<image:image><image:loc>' . e(absolute_url($img['loc'])) . '</image:loc><image:title>' . e($img['title']) . '</image:title></image:image>';
+            }
+            echo "</url>\n";
         }
         echo '</urlset>';
     }

@@ -101,6 +101,16 @@ function json_response(array $data, int $code = 200): never
 
 const MONTHS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 
+/** Titre utile pour alt/SEO : ignore les noms de fichier d'appareil (DSC_1234, GLE 1070, IMG-0042…). */
+function photo_label(?string $title, string $fallback): string
+{
+    $title = trim((string) $title);
+    if ($title === '' || preg_match('/^(dsc|dscf|dscn|img|gle|p|pxl|dji|_mg|mvi|sam|gopr)[\s_-]*\d+/i', $title)) {
+        return $fallback;
+    }
+    return $title;
+}
+
 function format_date_fr(?string $date): string
 {
     $t = $date ? strtotime($date) : false;

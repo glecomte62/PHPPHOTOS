@@ -11,7 +11,7 @@
 ?>
 <?php if ($hero): ?>
 <section class="hero">
-  <?= $view->partial('partials/picture', ['key' => $hero['file_key'], 'alt' => $hero['title'], 'sizes' => '100vw', 'loading' => 'eager', 'class' => 'hero__img']) ?>
+  <?= $view->partial('partials/picture', ['key' => $hero['file_key'], 'alt' => photo_label($hero['title'], $hero['album_title']), 'sizes' => '100vw', 'loading' => 'eager', 'class' => 'hero__img']) ?>
 </section>
 <?php endif; ?>
 
@@ -32,7 +32,7 @@
   <div class="sky__mosaic">
     <?php foreach ($skyPhotos as $p): ?>
       <a href="/<?= e($p['theme_slug']) ?>/<?= e($p['album_slug']) ?>/photo/<?= (int) $p['id'] ?>">
-        <?= $view->partial('partials/picture', ['key' => $p['file_key'], 'alt' => $p['title'], 'sizes' => '(min-width: 900px) 30vw, 50vw']) ?>
+        <?= $view->partial('partials/picture', ['key' => $p['file_key'], 'alt' => photo_label($p['title'], $p['album_title']), 'sizes' => '(min-width: 900px) 30vw, 50vw']) ?>
       </a>
     <?php endforeach; ?>
   </div>

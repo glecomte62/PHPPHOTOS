@@ -17,6 +17,14 @@ final class HelpersTest extends TestCase
         self::assertSame('/media/ab/abcdef-1280.jpg', media_url('abcdef', 1280, 'jpg'));
     }
 
+    public function testPhotoLabelIgnoresCameraFilenames(): void
+    {
+        self::assertSame('Arras', photo_label('GLE 1070', 'Arras'));
+        self::assertSame('Arras', photo_label('DSC_29571', 'Arras'));
+        self::assertSame('Arras', photo_label('', 'Arras'));
+        self::assertSame('Le beffroi au crépuscule', photo_label('Le beffroi au crépuscule', 'Arras'));
+    }
+
     public function testFrenchDates(): void
     {
         self::assertSame('14 juin 2025', format_date_fr('2025-06-14 10:32:05'));

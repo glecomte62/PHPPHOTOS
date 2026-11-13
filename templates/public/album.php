@@ -14,7 +14,7 @@
     <a class="mosaic__item" href="<?= e($baseUrl . '/photo/' . $p['id']) ?>" data-index="<?= (int) $i ?>"
        data-ratio="<?= e(round((int) $p['width'] / max(1, (int) $p['height']), 4)) ?>">
       <?= $view->partial('partials/picture', [
-          'key' => $p['file_key'], 'alt' => $p['title'], 'width' => $p['width'], 'height' => $p['height'],
+          'key' => $p['file_key'], 'alt' => photo_label($p['title'], $album['title'] . ' — photo ' . ($i + 1)), 'width' => $p['width'], 'height' => $p['height'],
           'sizes' => '(min-width: 900px) 33vw, 50vw',
       ]) ?>
     </a>
