@@ -240,9 +240,13 @@ class FlickrAPI
         $rawTitle = $data['photoset']['title'] ?? '';
         $title = is_array($rawTitle) ? ($rawTitle['_content'] ?? '') : (string)$rawTitle;
 
+        $rawDesc = $data['photoset']['description'] ?? '';
+        $description = is_array($rawDesc) ? ($rawDesc['_content'] ?? '') : (string)$rawDesc;
+
         return [
-            'title'  => $title,
-            'photos' => $photos,
+            'title'       => $title,
+            'description' => $description,
+            'photos'      => $photos,
         ];
     }
 

@@ -15,7 +15,7 @@ set -e
 SSH_HOST="legu7203.odns.fr"
 SSH_PORT="22"
 SSH_USER="legu7203"
-SSH_KEY="~/.ssh/phpphotos"
+SSH_KEY="~/.ssh/id_ed25519"
 
 # Chemin distant
 REMOTE_DIR="/home/legu7203/phpphotos"

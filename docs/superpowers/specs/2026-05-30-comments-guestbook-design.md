@@ -111,8 +111,11 @@ Message *     [________________________]
 
 ## Notification email
 
-- Envoi via `mail()` PHP natif (O2switch supporte l'envoi SMTP local)
-- Destinataire : constante `NOTIFY_EMAIL` depuis `.env`
+- Envoi via SMTP avec connexion socket PHP natif (pas de dépendance externe)
+- Compte expéditeur : `info@guillaumelecomte.net`
+- Serveur SMTP : `guillaumelecomte.net`, port 465 (SSL)
+- Destinataire : `info@guillaumelecomte.net` (constante `NOTIFY_EMAIL` dans `.env`)
+- Credentials dans `.env` : `MAIL_HOST`, `MAIL_PORT`, `MAIL_USER`, `MAIL_PASS`, `NOTIFY_EMAIL`
 - Sujet : `[guillaumelecomte.net] Nouveau commentaire — <context>`
 - Corps : nom, ville (si guestbook), message, contexte, date
 
