@@ -21,3 +21,13 @@ foreach (['schema.sql', 'seed.sql'] as $file) {
     }
     echo "OK $file\n";
 }
+
+// Évolutions de schéma sur une base existante (CREATE TABLE IF NOT EXISTS ne les applique pas)
+$hasColumn = static fn (string $table, string $column): bool => (bool) Database::value(
+    'SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?',
+    [$table, $column]
+);
+if (!$hasColumn('photos', 'file_hash')) {
+    Database::pdo()->exec('ALTER TABLE photos ADD COLUMN file_hash CHAR(40) NULL AFTER file_key, ADD KEY idx_album_hash (album_id, file_hash)');
+    echo "OK photos.file_hash ajoutée\n";
+}

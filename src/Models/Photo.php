@@ -18,6 +18,19 @@ final class Photo
         return Database::one(self::SELECT . ' WHERE p.id = ?', [$id]);
     }
 
+    /**
+     * Photo déjà présente dans l'album : même empreinte de fichier, ou, pour les photos importées
+     * avant le calcul d'empreinte, même titre d'origine et même date de prise de vue.
+     */
+    public static function findDuplicate(int $albumId, string $hash, string $title, ?string $takenAt): ?array
+    {
+        return Database::one(
+            'SELECT id FROM photos WHERE album_id = ? AND (file_hash = ?
+               OR (file_hash IS NULL AND ? IS NOT NULL AND taken_at = ? AND title = ?)) LIMIT 1',
+            [$albumId, $hash, $takenAt, $takenAt, $title]
+        );
+    }
+
     /** @return list<array<string, mixed>> */
     public static function forAlbum(int $albumId): array
     {

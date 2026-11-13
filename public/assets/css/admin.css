@@ -53,6 +53,7 @@ h2 { margin: 28px 0 12px; font-size: 1.15rem; }
 .upload-item { display: grid; grid-template-columns: 1fr 160px 220px auto; gap: 12px; align-items: center; font-size: .88rem; }
 .upload-item.is-done .upload-item__status { color: var(--ok); }
 .upload-item.is-error .upload-item__status { color: var(--danger); }
+.upload-item.is-skipped .upload-item__status { color: var(--muted); }
 .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
 .photo-card { display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--white); }
 .photo-card__img { position: relative; aspect-ratio: 3 / 2; background: var(--paper); }

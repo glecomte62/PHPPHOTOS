@@ -38,9 +38,17 @@ final class PhotoController extends AdminController
             json_response(['error' => 'Seuls les fichiers JPEG sont acceptés.'], 415);
         }
 
+        $hash = (string) sha1_file($file['tmp_name']);
+        $title = self::titleFromFilename((string) $file['name']);
+        $exif = (new ExifReader())->read($file['tmp_name']);
+        $duplicate = Photo::findDuplicate($albumId, $hash, $title, $exif['taken_at']);
+        if ($duplicate !== null) {
+            @unlink($file['tmp_name']);
+            json_response(['duplicate' => true, 'id' => (int) $duplicate['id']]);
+        }
+
         $key = bin2hex(random_bytes(12));
         $dir = media_dir($key);
-        $exif = (new ExifReader())->read($file['tmp_name']);
 
         try {
             $size = (new ImageProcessor())->process($file['tmp_name'], $dir, $key, $exif['orientation']);
@@ -53,7 +61,8 @@ final class PhotoController extends AdminController
             $id = Photo::create([
                 'album_id' => $albumId,
                 'file_key' => $key,
-                'title' => self::titleFromFilename((string) $file['name']),
+                'file_hash' => $hash,
+                'title' => $title,
                 'width' => $size['width'],
                 'height' => $size['height'],
                 'taken_at' => $exif['taken_at'],

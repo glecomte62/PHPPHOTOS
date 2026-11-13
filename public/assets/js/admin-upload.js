@@ -52,7 +52,11 @@
     xhr.onload = () => {
       let res = {};
       try { res = JSON.parse(xhr.responseText); } catch (e) { /* réponse non JSON (erreur serveur) */ }
-      if (xhr.status === 201 && res.html) {
+      if (xhr.status === 200 && res.duplicate) {
+        bar.value = 100;
+        status.textContent = 'Déjà dans l\'album (ignorée)';
+        row.classList.add('is-skipped');
+      } else if (xhr.status === 201 && res.html) {
         bar.value = 100;
         status.textContent = 'Ajoutée ✓';
         row.classList.add('is-done');

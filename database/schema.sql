@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS photos (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   album_id INT UNSIGNED NOT NULL,
   file_key CHAR(24) NOT NULL UNIQUE,
+  file_hash CHAR(40) NULL,
   title VARCHAR(190) NOT NULL DEFAULT '',
   caption TEXT NULL,
   position INT NOT NULL DEFAULT 0,
@@ -57,6 +58,7 @@ CREATE TABLE IF NOT EXISTS photos (
   lng DECIMAL(10,7) NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY idx_album_position (album_id, position),
+  KEY idx_album_hash (album_id, file_hash),
   CONSTRAINT fk_photos_album FOREIGN KEY (album_id) REFERENCES albums(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
