@@ -49,5 +49,8 @@ $router->post('/admin/content', static fn () => (new ContentController($view))->
 
 // --- Public ---
 $router->get('/', static fn () => $public()->home());
+$router->get('/{theme}/{album}/photo/{photo:\d+}', static fn (string $theme, string $album, string $photo) => $public()->album($theme, $album, $photo));
+$router->get('/{theme}/{album}', static fn (string $theme, string $album) => $public()->album($theme, $album));
+$router->get('/{theme}', static fn (string $theme) => $public()->theme($theme));
 
 return $router;
