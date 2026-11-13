@@ -8,8 +8,8 @@ set -euo pipefail
 TARGET="${1:-}"
 DRY="${2:-}"
 case "$TARGET" in
-  dev)  REMOTE_DIR="/home/legu7203/portfolio-dev" ;;
-  prod) REMOTE_DIR="/home/legu7203/portfolio" ;;
+  dev)  REMOTE_DIR="/home/legu7203/portfolio-dev"; SITE_URL="https://dev.guillaumelecomte.net" ;;
+  prod) REMOTE_DIR="/home/legu7203/portfolio";     SITE_URL="https://guillaumelecomte.net" ;;
   *) echo "Usage : $0 dev|prod [--dry-run]"; exit 1 ;;
 esac
 
@@ -48,4 +48,12 @@ fi
 
 echo "▶ Migrations"
 $SSH "$HOST" "cd $REMOTE_DIR && php bin/migrate.php"
+
+# Vider l'OPcache du PHP web (sinon l'ancien code peut rester servi un moment)
+echo "▶ Vidage du cache PHP"
+FLUSH="opcache-$(openssl rand -hex 8).php"
+$SSH "$HOST" "printf '%s' '<?php if (function_exists(\"opcache_reset\")) { opcache_reset(); } echo \"ok\";' > $REMOTE_DIR/public/$FLUSH"
+curl -s --max-time 15 "$SITE_URL/$FLUSH" || true
+echo
+$SSH "$HOST" "rm -f $REMOTE_DIR/public/$FLUSH"
 echo "✓ Déployé sur $TARGET"
