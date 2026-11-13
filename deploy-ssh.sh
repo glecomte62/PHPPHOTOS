@@ -33,8 +33,8 @@ composer test
 echo "▶ Synchronisation vers $TARGET ($REMOTE_DIR)"
 rsync -az --delete ${DRY:+--dry-run} -i -e "$SSH" \
   --exclude '.git/' --exclude '.github/' --exclude '.env*' --exclude '.DS_Store' --exclude 'error_log' --exclude '*.icloud' \
-  --exclude 'vendor/' --exclude 'tests/' --exclude 'docs/' --exclude '.phpunit.cache/' \
-  --exclude '.superpowers/' --exclude '.claude/' --exclude '.worktrees/' \
+  --exclude '/vendor/' --exclude '/tests/' --exclude '/docs/' --exclude '/.phpunit.cache/' \
+  --exclude '/.superpowers/' --exclude '/.claude/' --exclude '/.worktrees/' \
   --include 'public/media/.htaccess' --exclude 'public/media/*' \
   --exclude 'public/assets/img/presentation/*' \
   --exclude 'public/.well-known/' \
