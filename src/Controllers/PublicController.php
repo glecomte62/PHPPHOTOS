@@ -4,10 +4,12 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Models\Album;
+use App\Models\Page;
 use App\Models\Photo;
 use App\Models\Setting;
 use App\Models\Theme;
 use App\Services\Auth;
+use App\Services\PresentationImages;
 
 final class PublicController extends Controller
 {
@@ -125,5 +127,51 @@ final class PublicController extends Controller
             'lat' => $p['lat'] !== null ? (float) $p['lat'] : null,
             'lng' => $p['lng'] !== null ? (float) $p['lng'] : null,
         ];
+    }
+
+    public function map(): void
+    {
+        $this->render('public/map', [
+            'meta' => ['title' => 'Carte des photos', 'description' => 'Les lieux de mes photos sur une carte : paysages, villes et vues du ciel.'],
+            'styles' => [self::LEAFLET_CSS, self::CLUSTER_CSS, self::CLUSTER_DEFAULT_CSS],
+            'scripts' => [self::LEAFLET_JS, self::CLUSTER_JS, asset('js/map.js')],
+        ]);
+    }
+
+    public function mapData(): void
+    {
+        header('Cache-Control: public, max-age=300');
+        json_response(array_map(static fn (array $p): array => [
+            'lat' => (float) $p['lat'],
+            'lng' => (float) $p['lng'],
+            'title' => (string) $p['title'],
+            'album' => (string) $p['album_title'],
+            'thumb' => media_url((string) $p['file_key'], 480),
+            'url' => '/' . $p['theme_slug'] . '/' . $p['album_slug'] . '/photo/' . $p['id'],
+        ], Photo::geotagged()));
+    }
+
+    public function presentation(): void
+    {
+        $page = Page::find('presentation') ?? [
+            'title' => 'Présentation', 'lead' => null, 'body_html' => '', 'pilot_info' => null,
+            'banner_image' => null, 'portrait_image' => null,
+        ];
+        $this->render('public/presentation', [
+            'meta' => [
+                'title' => $page['title'],
+                'description' => $page['lead'],
+                'image' => $page['banner_image'] ? ltrim(PresentationImages::url((string) $page['banner_image'], 1280), '/') : null,
+                'type' => 'profile',
+                'jsonld' => [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'Person',
+                    'name' => 'Guillaume Lecomte',
+                    'jobTitle' => 'Photographe amateur et pilote ULM',
+                    'url' => absolute_url('/'),
+                ],
+            ],
+            'page' => $page,
+        ]);
     }
 }

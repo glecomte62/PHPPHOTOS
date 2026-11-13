@@ -49,6 +49,9 @@ $router->post('/admin/content', static fn () => (new ContentController($view))->
 
 // --- Public ---
 $router->get('/', static fn () => $public()->home());
+$router->get('/carte', static fn () => $public()->map());
+$router->get('/carte.json', static fn () => $public()->mapData());
+$router->get('/presentation', static fn () => $public()->presentation());
 $router->get('/{theme}/{album}/photo/{photo:\d+}', static fn (string $theme, string $album, string $photo) => $public()->album($theme, $album, $photo));
 $router->get('/{theme}/{album}', static fn (string $theme, string $album) => $public()->album($theme, $album));
 $router->get('/{theme}', static fn (string $theme) => $public()->theme($theme));
