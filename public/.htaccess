@@ -1,5 +1,10 @@
 Options -Indexes
 DirectoryIndex index.php
+
+# Limites d'envoi PHP : sur O2switch, .user.ini et php_value sont ignorés.
+# Elles se règlent pour tout le compte via le sélecteur PHP CloudLinux :
+#   selectorctl --interpreter=php -v 8.5 --add-options=upload_max_filesize:64M,post_max_size:64M
+
 RewriteEngine On
 
 # Validation des certificats Let's Encrypt
