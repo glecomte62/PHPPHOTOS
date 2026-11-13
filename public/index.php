@@ -9,7 +9,8 @@ if (PHP_SAPI === 'cli-server') {
     }
 }
 
-require dirname(__DIR__) . '/src/bootstrap.php';
+// realpath : la racine web peut être un lien symbolique vers public/
+require dirname((string) realpath(__DIR__)) . '/src/bootstrap.php';
 
 use App\Services\Env;
 use App\Services\View;
