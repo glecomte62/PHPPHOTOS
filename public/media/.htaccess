@@ -1,0 +1,7 @@
+# Médias : aucun script ne doit jamais s'exécuter ici
+Options -Indexes -ExecCGI
+RewriteEngine Off
+RemoveHandler .php .phtml .phar .php5 .php7 .php8
+<FilesMatch "\.(php|phtml|phar|php\d|pl|py|cgi|sh)$">
+    Require all denied
+</FilesMatch>

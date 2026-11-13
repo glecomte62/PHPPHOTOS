@@ -3,3 +3,14 @@
 .superpowers/
 .claude/
 .worktrees/
+/vendor/
+/.phpunit.cache/
+/public/media/*
+!/public/media/.htaccess
+/public/assets/img/presentation/*
+!/public/assets/img/presentation/.gitkeep
+/public/.well-known/
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/ratelimit/*
+!/storage/ratelimit/.gitkeep

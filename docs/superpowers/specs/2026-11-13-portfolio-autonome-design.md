@@ -62,7 +62,7 @@ Une photo n'est visible publiquement que si son album est `published`.
 
 ### Images
 
-- Chemin : `public/media/{album_id}/{file_key}-{w}.{webp|jpg}`, avec w ∈ {480, 1280, 2560}.
+- Chemin : `public/media/{2 premiers caractères de file_key}/{file_key}-{w}.{webp|jpg}`, avec w ∈ {480, 1280, 2560}. Le dossier ne dépend pas de l'album, donc déplacer une photo ne déplace aucun fichier.
 - La largeur maximale est de 2560 px, sans agrandissement si l'image est plus petite. La qualité est de 82 en WebP et de 85 en JPEG.
 - Côté navigateur, on utilise `<picture>` avec une source WebP et un repli en JPEG. Les attributs `srcset`/`sizes` laissent le navigateur choisir la taille, et `loading="lazy"` charge les images au défilement.
 - Après traitement, aucune donnée EXIF ne reste dans les fichiers publiés. GD les supprime de lui-même, ce qui retire aussi le GPS des fichiers. Les coordonnées GPS ne sont conservées qu'en base, pour la carte.
@@ -86,7 +86,7 @@ Les slugs `carte`, `presentation`, `contact`, `admin`, `media`, `assets` et `sit
 1. **Ouverture** : photo `hero_photo_id` en pleine largeur, d'environ 80vh, recadrée par `object-fit: cover`. La signature est placée dessous, sur un bandeau papier, et non par-dessus la photo.
 2. **Vues du ciel** : le thème `featured`. On y trouve `sky_intro`, une mosaïque de 3 à 5 photos (les plus récentes de ses albums publiés) et un lien vers le thème.
 3. **Derniers albums** : les 6 derniers albums publiés, avec couverture, titre, lieu et date.
-4. **Thèmes** : tous les autres thèmes en cartes (couverture et titre en italique).
+4. **Thèmes** : tous les thèmes visibles (y compris le thème mis en avant) en cartes (couverture et titre en italique).
 5. **Pied de page** : signature, liens vers Présentation, Carte et Contact, et « © Guillaume Lecomte ».
 
 ### Mosaïque d'album
