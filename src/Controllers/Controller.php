@@ -7,11 +7,27 @@ use App\Services\View;
 
 abstract class Controller
 {
-    protected const LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    protected const LEAFLET_JS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    protected const CLUSTER_CSS = 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css';
-    protected const CLUSTER_DEFAULT_CSS = 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css';
-    protected const CLUSTER_JS = 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js';
+    /** Leaflet 1.9.4 et Leaflet.markercluster 1.5.3, hébergés localement. @return list<string> */
+    protected static function leafletCss(): array
+    {
+        return [asset('vendor/leaflet/leaflet.css')];
+    }
+
+    /** @return list<string> */
+    protected static function clusterCss(): array
+    {
+        return [asset('vendor/markercluster/MarkerCluster.css'), asset('vendor/markercluster/MarkerCluster.Default.css')];
+    }
+
+    protected static function leafletJs(): string
+    {
+        return asset('vendor/leaflet/leaflet.js');
+    }
+
+    protected static function clusterJs(): string
+    {
+        return asset('vendor/markercluster/leaflet.markercluster.js');
+    }
 
     public function __construct(protected View $view)
     {

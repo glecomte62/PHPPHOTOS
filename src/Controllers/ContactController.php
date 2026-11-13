@@ -27,7 +27,15 @@ final class ContactController extends Controller
             redirect('/contact?envoye=1');
         }
         if ($result['errors']) {
-            $this->page(['errors' => $result['errors'], 'old' => $result['data']], 422);
+            $ts = (string) ($_POST['ts'] ?? '');
+            $this->page(['errors' => $result['errors'], 'old' => $result['data'], 'ts' => preg_match('/^\d+\.[a-f0-9]{64}$/', $ts) === 1 ? $ts : null], 422);
+            return;
+        }
+
+        $to = (string) Env::get('NOTIFY_EMAIL', '');
+        if (filter_var($to, FILTER_VALIDATE_EMAIL) === false) {
+            error_log('Contact : NOTIFY_EMAIL absent ou invalide, message non envoyé.');
+            $this->page(['errors' => ['global' => 'Le formulaire est momentanément indisponible. Réessayez plus tard.'], 'old' => $result['data']], 503);
             return;
         }
 
@@ -37,27 +45,27 @@ final class ContactController extends Controller
             $this->page(['errors' => ['global' => 'Vous avez déjà envoyé plusieurs messages. Réessayez dans une heure.'], 'old' => $result['data']], 429);
             return;
         }
+        $limiter->hit($rateKey, 3600);
 
         $d = $result['data'];
         $body = "Nom : {$d['name']}\nE-mail : {$d['email']}\n\n{$d['message']}\n\n— Envoyé depuis le formulaire de contact de guillaumelecomte.net";
-        $sent = Mailer::fromEnv()->send((string) Env::get('NOTIFY_EMAIL', ''), 'Contact site — ' . $d['name'], $body, $d['email']);
+        $sent = Mailer::fromEnv()->send($to, 'Contact site — ' . $d['name'], $body, $d['email']);
         if (!$sent) {
             $this->page(['errors' => ['global' => 'L\'envoi a échoué. Réessayez un peu plus tard.'], 'old' => $d], 502);
             return;
         }
-        $limiter->hit($rateKey, 3600);
         redirect('/contact?envoye=1');
     }
 
     /** @param array<string, mixed> $data */
     private function page(array $data, int $status = 200): void
     {
+        $data['ts'] = $data['ts'] ?? ContactForm::token((string) Env::get('APP_KEY', ''), time());
         $this->render('public/contact', $data + [
             'meta' => ['title' => 'Contact', 'description' => 'Écrire à Guillaume Lecomte, photographe et pilote ULM.'],
             'sent' => false,
             'errors' => [],
             'old' => [],
-            'ts' => ContactForm::token((string) Env::get('APP_KEY', ''), time()),
         ], $status);
     }
 }

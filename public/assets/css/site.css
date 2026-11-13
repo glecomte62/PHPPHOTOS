@@ -1,3 +1,4 @@
+html { scrollbar-gutter: stable; }
 /* Portfolio Guillaume Lecomte — style « papier clair » */
 :root {
   --paper: #f4f1ec;

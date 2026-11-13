@@ -1,6 +1,6 @@
 (() => {
   const el = document.getElementById('map');
-  if (!el || !window.L) return;
+  if (!el || !window.L || !L.markerClusterGroup) return;
   const map = L.map(el).setView([46.6, 2.4], 6);
   // Fond Esri « Light Gray Canvas » (gratuit, sans clé) + couche des noms de lieux
   const esri = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
@@ -12,7 +12,10 @@
   const cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 50 });
 
   fetch('/carte.json')
-    .then((r) => r.json())
+    .then((r) => {
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json();
+    })
     .then((photos) => {
       photos.forEach((p) => {
         const marker = L.circleMarker([p.lat, p.lng], { radius: 7, color: '#1b1b1a', weight: 2, fillColor: '#f4f1ec', fillOpacity: 1 });
@@ -33,5 +36,6 @@
       });
       map.addLayer(cluster);
       if (photos.length) map.fitBounds(cluster.getBounds(), { padding: [40, 40], maxZoom: 12 });
-    });
+    })
+    .catch(() => { el.textContent = 'Impossible de charger la carte pour le moment.'; });
 })();

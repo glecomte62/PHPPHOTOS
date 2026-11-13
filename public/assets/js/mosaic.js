@@ -3,7 +3,8 @@
 
   const layout = (container) => {
     const items = Array.from(container.querySelectorAll('.mosaic__item'));
-    const width = container.clientWidth - parseFloat(getComputedStyle(container).paddingLeft) - parseFloat(getComputedStyle(container).paddingRight);
+    const cs = getComputedStyle(container);
+    const width = Math.floor(container.getBoundingClientRect().width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 1);
     if (!width || items.length === 0) return;
     const target = width < 640 ? 160 : 280;
     let row = [];
@@ -30,6 +31,11 @@
   const containers = document.querySelectorAll('[data-mosaic]');
   const run = () => containers.forEach((c) => { c.classList.add('is-justified'); layout(c); });
   run();
-  let timer;
-  window.addEventListener('resize', () => { clearTimeout(timer); timer = setTimeout(run, 120); });
+  if ('ResizeObserver' in window) {
+    const ro = new ResizeObserver((entries) => entries.forEach((en) => layout(en.target)));
+    containers.forEach((c) => ro.observe(c));
+  } else {
+    let timer;
+    window.addEventListener('resize', () => { clearTimeout(timer); timer = setTimeout(run, 120); });
+  }
 })();

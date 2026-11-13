@@ -9,6 +9,9 @@
   let pushed = false;
   let miniMap = null;
   let marker = null;
+  let opener = null;
+  const baseTitle = document.title;
+  const albumName = baseTitle.split(' · ')[0];
 
   const root = document.createElement('div');
   root.className = 'viewer';
@@ -44,7 +47,7 @@
 
   const updateMap = (p) => {
     const hasGps = p.lat !== null && p.lng !== null;
-    mapBox.hidden = !hasGps;
+    mapBox.hidden = !hasGps || !window.L;
     if (!hasGps || info.hidden || !window.L) return;
     if (!miniMap) {
       miniMap = L.map(mapBox, { zoomControl: false, scrollWheelZoom: false });
@@ -85,6 +88,7 @@
         dd.textContent = v;
         dl.append(dt, dd);
       });
+    document.title = `${p.title || albumName} · Guillaume Lecomte`;
     updateMap(p);
     preload(index + 1);
     preload(index - 1);
@@ -98,7 +102,10 @@
   const hide = () => {
     root.hidden = true;
     document.body.classList.remove('viewer-open');
+    document.title = baseTitle;
     index = -1;
+    if (opener && document.contains(opener)) opener.focus();
+    opener = null;
   };
 
   const open = (i) => {
@@ -136,6 +143,7 @@
   document.querySelectorAll('.mosaic__item').forEach((a) => a.addEventListener('click', (ev) => {
     if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return;
     ev.preventDefault();
+    opener = a;
     open(parseInt(a.dataset.index, 10));
   }));
   $('.viewer__close').addEventListener('click', close);
@@ -147,7 +155,7 @@
     updateMap(photos[index]);
   });
   document.addEventListener('keydown', (ev) => {
-    if (root.hidden) return;
+    if (root.hidden || ev.metaKey || ev.ctrlKey || ev.altKey) return;
     if (ev.key === 'Escape') close();
     else if (ev.key === 'ArrowLeft') go(-1);
     else if (ev.key === 'ArrowRight') go(1);

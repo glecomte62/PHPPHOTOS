@@ -101,8 +101,8 @@ final class PublicController extends Controller
             'baseUrl' => $base,
             'openIndex' => $openIndex,
             'viewerPhotos' => array_map(self::viewerPhoto(...), $photos),
-            'styles' => [self::LEAFLET_CSS],
-            'scripts' => [self::LEAFLET_JS, asset('js/mosaic.js'), asset('js/viewer.js')],
+            'styles' => self::leafletCss(),
+            'scripts' => [self::leafletJs(), asset('js/mosaic.js'), asset('js/viewer.js')],
         ]);
     }
 
@@ -134,8 +134,8 @@ final class PublicController extends Controller
     {
         $this->render('public/map', [
             'meta' => ['title' => 'Carte des photos', 'description' => 'Les lieux de mes photos sur une carte : paysages, villes et vues du ciel.'],
-            'styles' => [self::LEAFLET_CSS, self::CLUSTER_CSS, self::CLUSTER_DEFAULT_CSS],
-            'scripts' => [self::LEAFLET_JS, self::CLUSTER_JS, asset('js/map.js')],
+            'styles' => [...self::leafletCss(), ...self::clusterCss()],
+            'scripts' => [self::leafletJs(), self::clusterJs(), asset('js/map.js')],
         ]);
     }
 

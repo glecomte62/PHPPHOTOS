@@ -23,5 +23,5 @@
 
 <script type="application/json" id="viewer-data"><?= json_encode(
     ['base' => $baseUrl, 'open' => $openIndex, 'photos' => $viewerPhotos],
-    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP
+    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_INVALID_UTF8_SUBSTITUTE
 ) ?></script>
