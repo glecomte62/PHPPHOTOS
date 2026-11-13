@@ -4,6 +4,7 @@ declare(strict_types=1);
 use App\Controllers\Admin\AlbumController;
 use App\Controllers\Admin\AuthController;
 use App\Controllers\Admin\DashboardController;
+use App\Controllers\Admin\PhotoController;
 use App\Controllers\Admin\ThemeController;
 use App\Controllers\PublicController;
 use App\Services\Router;
@@ -33,6 +34,15 @@ $router->get('/admin/albums/{id:\d+}', static fn (string $id) => (new AlbumContr
 $router->post('/admin/albums/{id:\d+}', static fn (string $id) => (new AlbumController($view))->update((int) $id));
 $router->post('/admin/albums/{id:\d+}/delete', static fn (string $id) => (new AlbumController($view))->delete((int) $id));
 $router->get('/admin/albums/{id:\d+}/photos', static fn (string $id) => (new AlbumController($view))->photos((int) $id));
+$router->post('/admin/albums/{id:\d+}/photos', static fn (string $id) => (new PhotoController($view))->upload((int) $id));
+$router->post('/admin/albums/{id:\d+}/photos/reorder', static fn (string $id) => (new PhotoController($view))->reorder((int) $id));
+$router->post('/admin/photos/{id:\d+}', static fn (string $id) => (new PhotoController($view))->update((int) $id));
+$router->post('/admin/photos/{id:\d+}/gps', static fn (string $id) => (new PhotoController($view))->gps((int) $id));
+$router->post('/admin/photos/{id:\d+}/delete', static fn (string $id) => (new PhotoController($view))->delete((int) $id));
+$router->post('/admin/photos/{id:\d+}/move', static fn (string $id) => (new PhotoController($view))->move((int) $id));
+$router->post('/admin/photos/{id:\d+}/cover', static fn (string $id) => (new PhotoController($view))->cover((int) $id));
+$router->post('/admin/photos/{id:\d+}/theme-cover', static fn (string $id) => (new PhotoController($view))->themeCover((int) $id));
+$router->post('/admin/photos/{id:\d+}/hero', static fn (string $id) => (new PhotoController($view))->hero((int) $id));
 
 // --- Public ---
 $router->get('/', static fn () => $public()->home());
