@@ -121,7 +121,7 @@ final class ExifReader
         if (!is_string($value)) {
             return null;
         }
-        $value = trim(str_replace("\0", '', $value));
+        $value = trim(mb_scrub(str_replace("\0", '', $value), 'UTF-8'));
         return $value === '' ? null : $value;
     }
 

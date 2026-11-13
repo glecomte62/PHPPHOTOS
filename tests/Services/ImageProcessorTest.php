@@ -85,4 +85,22 @@ final class ImageProcessorTest extends TestCase
         (new ImageProcessor())->process(self::FIX . 'no-exif.jpg', $this->dir, 'banner-1a2b3c4d', 1);
         self::assertFileExists("{$this->dir}/banner-1a2b3c4d-480.jpg");
     }
+
+    public function testParseBytes(): void
+    {
+        self::assertSame(512 * 1024 * 1024, ImageProcessor::parseBytes('512M'));
+        self::assertSame(1024 ** 3, ImageProcessor::parseBytes('1G'));
+        self::assertSame(128 * 1024, ImageProcessor::parseBytes('128K'));
+        self::assertSame(-1, ImageProcessor::parseBytes('-1'));
+        self::assertSame(2048, ImageProcessor::parseBytes('2048'));
+    }
+
+    public function testRejectsImageExceedingMemoryBudget(): void
+    {
+        $processor = new ImageProcessor(memoryBudget: 33 * 1024 * 1024);
+
+        $this->expectException(ImageException::class);
+        $this->expectExceptionMessage('trop lourde pour la mémoire');
+        $processor->process(self::FIX . 'exif-full.jpg', $this->dir, 'big', 1);
+    }
 }

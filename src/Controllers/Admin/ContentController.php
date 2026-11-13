@@ -28,6 +28,7 @@ final class ContentController extends AdminController
 
     public function update(): void
     {
+        $this->rejectOversizedPost();
         $this->verifyCsrf();
         Setting::set('site_tagline', mb_substr(trim((string) ($_POST['site_tagline'] ?? '')), 0, 150));
         Setting::set('sky_intro', trim((string) ($_POST['sky_intro'] ?? '')));

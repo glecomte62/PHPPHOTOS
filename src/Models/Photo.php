@@ -46,9 +46,11 @@ final class Photo
         if ($photo === null) {
             return null;
         }
-        Database::run('UPDATE albums SET cover_photo_id = NULL WHERE cover_photo_id = ?', [$id]);
-        Database::run('UPDATE themes SET cover_photo_id = NULL WHERE cover_photo_id = ?', [$id]);
-        Database::run('DELETE FROM photos WHERE id = ?', [$id]);
+        Database::transaction(static function () use ($id): void {
+            Database::run('UPDATE albums SET cover_photo_id = NULL WHERE cover_photo_id = ?', [$id]);
+            Database::run('UPDATE themes SET cover_photo_id = NULL WHERE cover_photo_id = ?', [$id]);
+            Database::run('DELETE FROM photos WHERE id = ?', [$id]);
+        });
         return (string) $photo['file_key'];
     }
 
@@ -66,6 +68,7 @@ final class Photo
     {
         Database::transaction(static function () use ($id, $toAlbumId): void {
             Database::run('UPDATE albums SET cover_photo_id = NULL WHERE cover_photo_id = ?', [$id]);
+            Database::run('UPDATE themes SET cover_photo_id = NULL WHERE cover_photo_id = ?', [$id]);
             $position = (int) Database::value('SELECT COALESCE(MAX(position), 0) + 1 FROM photos WHERE album_id = ?', [$toAlbumId]);
             Database::run('UPDATE photos SET album_id = ?, position = ? WHERE id = ?', [$toAlbumId, $position, $id]);
         });

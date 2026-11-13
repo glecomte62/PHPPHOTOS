@@ -44,6 +44,14 @@ function start_session(): void
         return;
     }
     ini_set('session.use_strict_mode', '1');
+    ini_set('session.gc_maxlifetime', '7200');
+    $savePath = ROOT . '/storage/sessions';
+    if (!is_dir($savePath)) {
+        @mkdir($savePath, 0700, true);
+    }
+    if (is_dir($savePath) && is_writable($savePath)) {
+        session_save_path($savePath);
+    }
     session_name(SESSION_NAME);
     session_set_cookie_params([
         'lifetime' => 0,

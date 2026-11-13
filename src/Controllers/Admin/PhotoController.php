@@ -17,6 +17,7 @@ final class PhotoController extends AdminController
 
     public function upload(int $albumId): void
     {
+        $this->rejectOversizedPost();
         $this->verifyCsrf();
         $album = Album::find($albumId) ?? $this->abort404('Album introuvable.');
 
@@ -29,6 +30,9 @@ final class PhotoController extends AdminController
         }
         if ($file['size'] > self::MAX_BYTES) {
             json_response(['error' => 'Fichier trop lourd (48 Mo maximum).'], 413);
+        }
+        if (!is_uploaded_file((string) $file['tmp_name'])) {
+            json_response(['error' => 'Fichier invalide.'], 400);
         }
         if ((new \finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']) !== 'image/jpeg') {
             json_response(['error' => 'Seuls les fichiers JPEG sont acceptés.'], 415);
@@ -53,12 +57,12 @@ final class PhotoController extends AdminController
                 'width' => $size['width'],
                 'height' => $size['height'],
                 'taken_at' => $exif['taken_at'],
-                'camera' => $exif['camera'],
-                'lens' => $exif['lens'],
-                'focal_length' => $exif['focal_length'],
-                'aperture' => $exif['aperture'],
-                'shutter' => $exif['shutter'],
-                'iso' => $exif['iso'],
+                'camera' => self::cut($exif['camera'], 100),
+                'lens' => self::cut($exif['lens'], 150),
+                'focal_length' => self::cut($exif['focal_length'], 20),
+                'aperture' => self::cut($exif['aperture'], 20),
+                'shutter' => self::cut($exif['shutter'], 20),
+                'iso' => $exif['iso'] !== null && $exif['iso'] >= 1 && $exif['iso'] <= 10_000_000 ? $exif['iso'] : null,
                 'lat' => $exif['lat'],
                 'lng' => $exif['lng'],
             ]);
@@ -178,8 +182,13 @@ final class PhotoController extends AdminController
 
     private static function titleFromFilename(string $name): string
     {
-        $base = (string) pathinfo($name, PATHINFO_FILENAME);
+        $base = mb_scrub((string) pathinfo($name, PATHINFO_FILENAME), 'UTF-8');
         return mb_substr(trim((string) preg_replace('/[_\-]+/', ' ', $base)), 0, 190);
+    }
+
+    private static function cut(?string $value, int $max): ?string
+    {
+        return $value === null ? null : mb_substr($value, 0, $max);
     }
 
     private static function uploadError(int $code): string

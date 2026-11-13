@@ -5,7 +5,7 @@ require dirname(__DIR__) . '/src/bootstrap.php';
 
 use App\Services\Database;
 
-foreach (['storage/logs', 'storage/ratelimit', 'public/media', 'public/assets/img/presentation'] as $dir) {
+foreach (['storage/logs', 'storage/ratelimit', 'storage/sessions', 'public/media', 'public/assets/img/presentation'] as $dir) {
     if (!is_dir(ROOT . '/' . $dir)) {
         mkdir(ROOT . '/' . $dir, 0775, true);
     }

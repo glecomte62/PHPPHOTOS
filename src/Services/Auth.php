@@ -15,6 +15,7 @@ final class Auth
         }
         start_session();
         session_regenerate_id(true);
+        unset($_SESSION['_csrf']);
         $_SESSION['admin_id'] = (int) $user['id'];
         $_SESSION['admin_seen'] = time();
         Database::run('UPDATE admin_users SET last_login_at = NOW() WHERE id = ?', [$user['id']]);

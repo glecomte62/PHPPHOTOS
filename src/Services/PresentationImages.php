@@ -30,7 +30,12 @@ final class PresentationImages
 
         $column = $slot . '_image';
         $old = Page::find('presentation')[$column] ?? null;
-        Page::update('presentation', [$column => $key]);
+        try {
+            Page::update('presentation', [$column => $key]);
+        } catch (\Throwable $e) {
+            ImageProcessor::deleteVariants($dir, $key, self::WIDTHS);
+            throw $e;
+        }
         if (is_string($old) && $old !== '') {
             ImageProcessor::deleteVariants($dir, $old, self::WIDTHS);
         }

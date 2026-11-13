@@ -6,6 +6,7 @@ namespace App\Controllers\Admin;
 use App\Controllers\Controller;
 use App\Services\Auth;
 use App\Services\Csrf;
+use App\Services\ImageProcessor;
 use App\Services\View;
 
 abstract class AdminController extends Controller
@@ -18,6 +19,9 @@ abstract class AdminController extends Controller
         header('X-Robots-Tag: noindex, nofollow');
         header('Cache-Control: no-store');
         if (!Auth::check()) {
+            if ($this->wantsJson()) {
+                json_response(['error' => 'Session expirée : reconnectez-vous.'], 401);
+            }
             redirect('/admin/login');
         }
     }
@@ -39,6 +43,21 @@ abstract class AdminController extends Controller
             }
             http_response_code(419);
             exit('Session expirée : rechargez la page.');
+        }
+    }
+
+    /** Corps de requête dépassant post_max_size : PHP vide $_POST et $_FILES, le jeton CSRF semblerait absent. */
+    protected function rejectOversizedPost(): void
+    {
+        $max = ImageProcessor::parseBytes((string) ini_get('post_max_size'));
+        $length = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+        if ($max > 0 && $length > $max) {
+            $message = 'Envoi trop volumineux (max ' . ini_get('post_max_size') . 'o).';
+            if ($this->wantsJson()) {
+                json_response(['error' => $message], 413);
+            }
+            flash('error', $message);
+            redirect($_SERVER['HTTP_REFERER'] ?? '/admin');
         }
     }
 

@@ -5,6 +5,12 @@ RewriteEngine On
 # Validation des certificats Let's Encrypt
 RewriteRule ^\.well-known/ - [L]
 
+# HTTPS obligatoire (sauf en local)
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:\d+)?$
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
 # Tout ce qui n'est pas un fichier existant passe par index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ index.php [L,QSA]

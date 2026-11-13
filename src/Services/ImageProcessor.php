@@ -11,6 +11,7 @@ final class ImageProcessor
         private int $maxPixels = 60_000_000,
         private int $webpQuality = 82,
         private int $jpegQuality = 85,
+        private ?int $memoryBudget = null,
     ) {
     }
 
@@ -32,6 +33,14 @@ final class ImageProcessor
         }
         if ($info[0] * $info[1] > $this->maxPixels) {
             throw new ImageException('Image trop grande (' . intdiv($this->maxPixels, 1_000_000) . ' mégapixels maximum).');
+        }
+        $budget = $this->memoryBudget ?? self::availableMemory();
+        if ($budget !== null) {
+            $needed = $info[0] * $info[1] * 5 + 32 * 1024 * 1024;
+            if ($needed > $budget) {
+                $maxMpx = max(0, intdiv($budget - 32 * 1024 * 1024, 5 * 1_000_000));
+                throw new ImageException('Image trop lourde pour la mémoire du serveur (' . $maxMpx . ' Mpx maximum).');
+            }
         }
         ini_set('gd.jpeg_ignore_warning', '1');
         $img = @imagecreatefromjpeg($source);
@@ -82,6 +91,29 @@ final class ImageProcessor
         }
 
         return ['width' => $w, 'height' => $h];
+    }
+
+    /** Convertit une valeur php.ini ('512M', '1G', '128K', '-1') en octets (-1 = illimité). */
+    public static function parseBytes(string $value): int
+    {
+        $value = trim($value);
+        if ($value === '-1') {
+            return -1;
+        }
+        $n = (int) $value;
+        return match (strtoupper(substr($value, -1))) {
+            'G' => $n * 1024 ** 3,
+            'M' => $n * 1024 ** 2,
+            'K' => $n * 1024,
+            default => $n,
+        };
+    }
+
+    /** Mémoire encore disponible, ou null si illimitée. */
+    private static function availableMemory(): ?int
+    {
+        $limit = self::parseBytes((string) ini_get('memory_limit'));
+        return $limit < 0 ? null : $limit - memory_get_usage();
     }
 
     /** @param list<int> $widths */

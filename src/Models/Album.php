@@ -10,7 +10,7 @@ final class Album
 {
     private const SELECT = "SELECT a.*, t.slug AS theme_slug, t.title AS theme_title,
         COALESCE(
-          (SELECT p.file_key FROM photos p WHERE p.id = a.cover_photo_id),
+          (SELECT p.file_key FROM photos p WHERE p.id = a.cover_photo_id AND p.album_id = a.id),
           (SELECT p.file_key FROM photos p WHERE p.album_id = a.id ORDER BY p.position, p.id LIMIT 1)
         ) AS cover_key,
         (SELECT COUNT(*) FROM photos p WHERE p.album_id = a.id) AS photo_count
@@ -97,9 +97,11 @@ final class Album
     /** Supprime l'album et ses photos en base. @return list<string> clés des fichiers à supprimer */
     public static function delete(int $id): array
     {
-        $keys = array_column(Database::all('SELECT file_key FROM photos WHERE album_id = ?', [$id]), 'file_key');
-        Database::run('DELETE FROM albums WHERE id = ?', [$id]);
-        return $keys;
+        return Database::transaction(static function () use ($id): array {
+            $keys = array_column(Database::all('SELECT file_key FROM photos WHERE album_id = ?', [$id]), 'file_key');
+            Database::run('DELETE FROM albums WHERE id = ?', [$id]);
+            return $keys;
+        });
     }
 
     /** @param list<int|string> $ids */

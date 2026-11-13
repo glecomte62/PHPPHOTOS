@@ -10,7 +10,8 @@ final class Theme
 {
     private const SELECT = "SELECT t.*,
         COALESCE(
-          (SELECT p.file_key FROM photos p WHERE p.id = t.cover_photo_id),
+          (SELECT p.file_key FROM photos p JOIN albums a ON a.id = p.album_id
+            WHERE p.id = t.cover_photo_id AND a.theme_id = t.id AND a.status = 'published'),
           (SELECT p.file_key FROM photos p JOIN albums a ON a.id = p.album_id
             WHERE a.theme_id = t.id AND a.status = 'published'
             ORDER BY a.position, a.id, p.position, p.id LIMIT 1)

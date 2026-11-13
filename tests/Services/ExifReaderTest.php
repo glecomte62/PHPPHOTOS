@@ -69,4 +69,13 @@ final class ExifReaderTest extends TestCase
         self::assertNull($m->invoke(null, '2025:13:45 25:61:61'));
         self::assertSame('2025-06-14 10:32:05', $m->invoke(null, '2025:06:14 10:32:05'));
     }
+
+    public function testScrubsInvalidUtf8(): void
+    {
+        $camera = ExifReader::camera("\xFF\xFEABC", null);
+
+        self::assertNotNull($camera);
+        self::assertTrue(mb_check_encoding($camera, 'UTF-8'));
+        self::assertStringContainsString('ABC', $camera);
+    }
 }
