@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use App\Controllers\Admin\AlbumController;
 use App\Controllers\Admin\AuthController;
+use App\Controllers\Admin\ContentController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\PhotoController;
 use App\Controllers\Admin\ThemeController;
@@ -43,6 +44,8 @@ $router->post('/admin/photos/{id:\d+}/move', static fn (string $id) => (new Phot
 $router->post('/admin/photos/{id:\d+}/cover', static fn (string $id) => (new PhotoController($view))->cover((int) $id));
 $router->post('/admin/photos/{id:\d+}/theme-cover', static fn (string $id) => (new PhotoController($view))->themeCover((int) $id));
 $router->post('/admin/photos/{id:\d+}/hero', static fn (string $id) => (new PhotoController($view))->hero((int) $id));
+$router->get('/admin/content', static fn () => (new ContentController($view))->edit());
+$router->post('/admin/content', static fn () => (new ContentController($view))->update());
 
 // --- Public ---
 $router->get('/', static fn () => $public()->home());
