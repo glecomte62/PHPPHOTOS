@@ -52,5 +52,6 @@ $canonical = absolute_url((string) (parse_url($_SERVER['REQUEST_URI'] ?? '/', PH
 <?php foreach ($scripts ?? [] as $src): ?>
 <script src="<?= e($src) ?>" defer></script>
 <?php endforeach; ?>
+<?= $view->partial('partials/matomo') ?>
 </body>
 </html>
