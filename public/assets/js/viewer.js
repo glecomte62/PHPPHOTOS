@@ -50,10 +50,13 @@
     mapBox.hidden = !hasGps || !window.L;
     if (!hasGps || info.hidden || !window.L) return;
     if (!miniMap) {
-      miniMap = L.map(mapBox, { zoomControl: false, scrollWheelZoom: false });
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+      miniMap = L.map(mapBox, { scrollWheelZoom: false });
+      // Fond gris + couche des noms de lieux (villes, routes, côtes), comme sur la grande carte
+      const esri = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
+      L.tileLayer(`${esri}World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {
         attribution: '© Esri, © OpenStreetMap', maxZoom: 16,
       }).addTo(miniMap);
+      L.tileLayer(`${esri}World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, { maxZoom: 16 }).addTo(miniMap);
       marker = L.circleMarker([p.lat, p.lng], { radius: 7, color: '#1b1b1a', weight: 2, fillColor: '#f4f1ec', fillOpacity: 1 }).addTo(miniMap);
     }
     marker.setLatLng([p.lat, p.lng]);
