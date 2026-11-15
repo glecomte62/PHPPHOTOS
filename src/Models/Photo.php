@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Services\Database;
+use App\Services\SearchQuery;
 
 final class Photo
 {
@@ -91,6 +92,37 @@ final class Photo
     public static function geotagged(): array
     {
         return Database::all(self::SELECT . " WHERE a.status = 'published' AND p.lat IS NOT NULL AND p.lng IS NOT NULL ORDER BY p.id");
+    }
+
+    /**
+     * Photos des albums publiés dont le titre, la légende, l'album, le lieu ou la galerie contiennent
+     * tous les mots cherchés (collation insensible aux accents et à la casse). Les correspondances
+     * dans le titre puis dans la légende remontent en premier.
+     *
+     * @param list<string> $terms
+     * @return list<array<string, mixed>>
+     */
+    public static function search(array $terms, int $limit): array
+    {
+        if ($terms === []) {
+            return [];
+        }
+        $where = [];
+        $score = [];
+        $whereParams = [];
+        $scoreParams = [];
+        foreach ($terms as $term) {
+            $like = SearchQuery::likePattern($term);
+            $where[] = "CONCAT_WS(' ', p.title, p.caption, a.title, a.location, t.title) LIKE ?";
+            $whereParams[] = $like;
+            $score[] = '(p.title LIKE ?) * 3 + (COALESCE(p.caption, \'\') LIKE ?) * 2';
+            array_push($scoreParams, $like, $like);
+        }
+        return Database::all(
+            self::SELECT . " WHERE a.status = 'published' AND " . implode(' AND ', $where)
+            . ' ORDER BY (' . implode(' + ', $score) . ') DESC, a.published_at DESC, p.position, p.id LIMIT ' . (int) $limit,
+            [...$whereParams, ...$scoreParams]
+        );
     }
 
     /** @return list<array<string, mixed>> */

@@ -1,6 +1,6 @@
 <?php
 /** @var string $content */
-$meta = ($meta ?? []) + ['title' => null, 'description' => null, 'image' => null, 'type' => 'website', 'jsonld' => null];
+$meta = ($meta ?? []) + ['title' => null, 'description' => null, 'image' => null, 'type' => 'website', 'jsonld' => null, 'robots' => null];
 $siteName = 'Guillaume Lecomte — Photographe';
 $fullTitle = $meta['title'] ? $meta['title'] . ' · Guillaume Lecomte' : $siteName;
 $description = $meta['description'] ?: 'Portfolio de Guillaume Lecomte, photographe amateur et pilote ULM : paysages, patrimoine, aviation et vues du ciel.';
@@ -13,6 +13,10 @@ $canonical = absolute_url((string) (parse_url($_SERVER['REQUEST_URI'] ?? '/', PH
 <title><?= e($fullTitle) ?></title>
 <meta name="description" content="<?= e($description) ?>">
 <link rel="canonical" href="<?= e($canonical) ?>">
+<?php if ($meta['robots']): ?>
+<meta name="robots" content="<?= e($meta['robots']) ?>">
+<?php endif; ?>
+<link rel="search" type="application/opensearchdescription+xml" title="Guillaume Lecomte" href="/opensearch.xml">
 <meta property="og:site_name" content="<?= e($siteName) ?>">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:type" content="<?= e($meta['type']) ?>">

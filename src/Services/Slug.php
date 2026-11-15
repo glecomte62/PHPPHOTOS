@@ -6,7 +6,7 @@ namespace App\Services;
 final class Slug
 {
     /** Premiers segments d'URL utilisés par le site : aucun thème ne peut les prendre. */
-    public const RESERVED = ['admin', 'assets', 'media', 'carte', 'carte.json', 'presentation', 'contact', 'sitemap.xml', 'robots.txt'];
+    public const RESERVED = ['admin', 'assets', 'media', 'carte', 'carte.json', 'presentation', 'contact', 'sitemap.xml', 'robots.txt', 'recherche', 'opensearch.xml'];
 
     private const MAP = [
         'à' => 'a', 'â' => 'a', 'ä' => 'a', 'á' => 'a', 'ã' => 'a', 'å' => 'a',

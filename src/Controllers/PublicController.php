@@ -11,6 +11,7 @@ use App\Models\Theme;
 use App\Services\Auth;
 use App\Services\Env;
 use App\Services\PresentationImages;
+use App\Services\SearchQuery;
 
 final class PublicController extends Controller
 {
@@ -159,6 +160,47 @@ final class PublicController extends Controller
             'thumb' => media_url((string) $p['file_key'], 480),
             'url' => '/' . $p['theme_slug'] . '/' . $p['album_slug'] . '/photo/' . $p['id'],
         ], Photo::geotagged()));
+    }
+
+    private const SEARCH_PHOTO_LIMIT = 60;
+
+    public function search(): void
+    {
+        $query = SearchQuery::normalize($_GET['q'] ?? '');
+        $terms = SearchQuery::terms($query);
+        $photos = Photo::search($terms, self::SEARCH_PHOTO_LIMIT);
+
+        $this->render('public/search', [
+            'meta' => [
+                'title' => $query !== '' ? 'Recherche : ' . $query : 'Recherche',
+                'description' => 'Rechercher une photo ou un album par lieu, sujet ou titre.',
+                'robots' => 'noindex, follow',
+            ],
+            'query' => $query,
+            'searched' => $terms !== [],
+            'albums' => Album::search($terms, 12),
+            'photos' => $photos,
+            'photoLimit' => self::SEARCH_PHOTO_LIMIT,
+            'scripts' => [asset('js/mosaic.js')],
+        ]);
+    }
+
+    /** Description OpenSearch : permet de chercher sur le site depuis la barre d'adresse du navigateur. */
+    public function openSearch(): void
+    {
+        header('Content-Type: application/opensearchdescription+xml; charset=utf-8');
+        header('Cache-Control: public, max-age=86400');
+        echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        echo '<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/" xmlns:moz="http://www.mozilla.org/2006/browser/search/">' . "\n";
+        echo "  <ShortName>Guillaume Lecomte</ShortName>\n";
+        echo "  <Description>Rechercher dans les photos de Guillaume Lecomte</Description>\n";
+        echo "  <InputEncoding>UTF-8</InputEncoding>\n";
+        echo "  <Language>fr-FR</Language>\n";
+        echo '  <Image width="32" height="32" type="image/png">' . e(absolute_url('/assets/img/favicon-32.png')) . "</Image>\n";
+        echo '  <Url type="text/html" method="get" template="' . e(absolute_url('/recherche')) . '?q={searchTerms}"/>' . "\n";
+        echo '  <Url type="application/opensearchdescription+xml" rel="self" template="' . e(absolute_url('/opensearch.xml')) . '"/>' . "\n";
+        echo '  <moz:SearchForm>' . e(absolute_url('/recherche')) . "</moz:SearchForm>\n";
+        echo '</OpenSearchDescription>';
     }
 
     public function presentation(): void

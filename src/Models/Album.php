@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Services\Database;
+use App\Services\SearchQuery;
 use App\Services\Slug;
 
 final class Album
@@ -32,6 +33,30 @@ final class Album
     {
         $sql = self::SELECT . ' WHERE a.theme_id = ?' . ($publishedOnly ? " AND a.status = 'published'" : '') . ' ORDER BY a.position, a.id';
         return Database::all($sql, [$themeId]);
+    }
+
+    /**
+     * Albums publiés dont le titre, la description, le lieu ou la galerie contiennent tous les mots cherchés.
+     *
+     * @param list<string> $terms
+     * @return list<array<string, mixed>>
+     */
+    public static function search(array $terms, int $limit): array
+    {
+        if ($terms === []) {
+            return [];
+        }
+        $where = [];
+        $params = [];
+        foreach ($terms as $term) {
+            $where[] = "CONCAT_WS(' ', a.title, a.description, a.location, t.title) LIKE ?";
+            $params[] = SearchQuery::likePattern($term);
+        }
+        return Database::all(
+            self::SELECT . " WHERE a.status = 'published' AND " . implode(' AND ', $where)
+            . ' ORDER BY a.published_at DESC, a.id DESC LIMIT ' . (int) $limit,
+            $params
+        );
     }
 
     /** @return list<array<string, mixed>> */
