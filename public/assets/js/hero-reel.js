@@ -56,7 +56,6 @@
     hero.classList.toggle('is-paused', paused);
     if (toggle) {
       toggle.setAttribute('aria-label', paused ? 'Lire le diaporama' : 'Mettre le diaporama en pause');
-      toggle.firstElementChild.textContent = paused ? '▶' : '❚❚';
     }
     schedule(DURATION);
   }

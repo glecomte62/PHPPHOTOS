@@ -20,7 +20,8 @@
   <?php endforeach; ?>
   <?php if (count($reel) > 1): ?>
     <button type="button" class="hero__toggle" aria-label="Mettre le diaporama en pause" hidden>
-      <span aria-hidden="true">❚❚</span>
+      <svg class="hero__icon-pause" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><rect x="2" y="1" width="3" height="10"/><rect x="7" y="1" width="3" height="10"/></svg>
+      <svg class="hero__icon-play" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M3 1l8 5-8 5z"/></svg>
     </button>
   <?php endif; ?>
 </section>
