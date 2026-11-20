@@ -31,3 +31,7 @@ if (!$hasColumn('photos', 'file_hash')) {
     Database::pdo()->exec('ALTER TABLE photos ADD COLUMN file_hash CHAR(40) NULL AFTER file_key, ADD KEY idx_album_hash (album_id, file_hash)');
     echo "OK photos.file_hash ajoutée\n";
 }
+if (!$hasColumn('photos', 'original_name')) {
+    Database::pdo()->exec('ALTER TABLE photos ADD COLUMN original_name VARCHAR(190) NULL AFTER file_hash');
+    echo "OK photos.original_name ajoutée\n";
+}

@@ -27,11 +27,13 @@
     <figure class="viewer__stage">
       <picture><source type="image/webp"><img alt=""></picture>
       <figcaption class="viewer__caption"></figcaption>
+      <a class="viewer__contact" href="/contact">Cette photo vous intéresse ? Contactez-moi</a>
     </figure>
     <aside class="viewer__info" hidden>
       <h2 class="viewer__title"></h2>
       <p class="viewer__text"></p>
       <dl class="viewer__exif"></dl>
+      <a class="button viewer__contact-button" href="/contact">Me contacter pour cette photo</a>
       <div class="viewer__map" hidden></div>
     </aside>`;
   document.body.appendChild(root);
@@ -81,7 +83,9 @@
     $('.viewer__text').textContent = p.caption || '';
     const dl = $('.viewer__exif');
     dl.replaceChildren();
-    [['Date', p.taken], ['Appareil', p.camera], ['Objectif', p.lens], ['Focale', p.focal],
+    $('.viewer__contact').href = p.contact;
+    $('.viewer__contact-button').href = p.contact;
+    [['Fichier', p.file], ['Date', p.taken], ['Appareil', p.camera], ['Objectif', p.lens], ['Focale', p.focal],
       ['Ouverture', p.aperture], ['Vitesse', p.shutter], ['ISO', p.iso]]
       .filter(([, v]) => v)
       .forEach(([k, v]) => {

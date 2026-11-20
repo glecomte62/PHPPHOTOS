@@ -111,6 +111,18 @@ function photo_label(?string $title, string $fallback): string
     return $title;
 }
 
+/** Nom du fichier tel qu'envoyé depuis l'ordinateur, sans chemin ni caractères de contrôle. */
+function original_filename(string $name): ?string
+{
+    $name = mb_scrub(str_replace('\\', '/', $name), 'UTF-8');
+    $name = (string) preg_replace('/[\x00-\x1F\x7F]/u', '', $name);
+    $name = trim(basename(trim($name)), " .\t");
+    if ($name === '') {
+        return null;
+    }
+    return mb_substr($name, 0, 190);
+}
+
 function format_date_fr(?string $date): string
 {
     $t = $date ? strtotime($date) : false;

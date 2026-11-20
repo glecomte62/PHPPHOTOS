@@ -62,6 +62,7 @@ final class PhotoController extends AdminController
                 'album_id' => $albumId,
                 'file_key' => $key,
                 'file_hash' => $hash,
+                'original_name' => original_filename((string) $file['name']),
                 'title' => $title,
                 'width' => $size['width'],
                 'height' => $size['height'],

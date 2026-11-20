@@ -127,6 +127,8 @@ final class PublicController extends Controller
             'id' => (int) $p['id'],
             'title' => (string) $p['title'],
             'caption' => (string) ($p['caption'] ?? ''),
+            'file' => $p['original_name'] ?? null,
+            'contact' => '/contact?photo=' . (int) $p['id'],
             'webp' => media_url($key, 2560, 'webp'),
             'jpg' => media_url($key, 2560, 'jpg'),
             'webpM' => media_url($key, 1280, 'webp'),

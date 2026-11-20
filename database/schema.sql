@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS photos (
   album_id INT UNSIGNED NOT NULL,
   file_key CHAR(24) NOT NULL UNIQUE,
   file_hash CHAR(40) NULL,
+  original_name VARCHAR(190) NULL,
   title VARCHAR(190) NOT NULL DEFAULT '',
   caption TEXT NULL,
   position INT NOT NULL DEFAULT 0,
