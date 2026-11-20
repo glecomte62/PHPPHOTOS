@@ -145,13 +145,16 @@ final class Photo
      * Photos du diaporama d'accueil : des vues en paysage tirées au hasard dans les albums publiés,
      * une seule par album pour varier les sujets. Y figurent toujours $nightCount photos de nuit et
      * une photo de chaque lieu de $places (cherché dans le titre et le lieu de l'album, sans tenir
-     * compte des accents ni de la casse) ; le reste est complété au hasard.
+     * compte des accents ni de la casse) ; le reste est complété au hasard. La photo $first (la photo
+     * d'accueil) ouvre le diaporama et compte pour son album.
      *
+     * @param ?array<string, mixed> $first
      * @param list<string> $places
      * @return list<array<string, mixed>>
      */
-    public static function heroReel(int $limit, int $excludeId = 0, array $places = [], int $nightCount = 0): array
+    public static function heroReel(int $limit, ?array $first = null, array $places = [], int $nightCount = 0): array
     {
+        $excludeId = $first ? (int) $first['id'] : 0;
         $base = self::SELECT . " WHERE a.status = 'published' AND p.width >= p.height * 1.3 AND p.id <> ?";
         $rows = Database::all($base . ' ORDER BY RAND() LIMIT 300', [$excludeId]);
         $night = $nightCount > 0 ? Database::all($base . ' AND ' . self::NIGHT . ' ORDER BY RAND() LIMIT 100', [$excludeId]) : [];
@@ -163,7 +166,7 @@ final class Photo
         $albumText = static fn (array $row): string => $fold($row['album_title'] . ' ' . $row['location']);
 
         /** @var array<int, array<string, mixed>> $picked une photo par album */
-        $picked = [];
+        $picked = $first ? [(int) $first['album_id'] => $first] : [];
         $take = static function (array $candidates, callable $accept) use (&$picked, $limit): void {
             foreach ($candidates as $row) {
                 $albumId = (int) $row['album_id'];
@@ -188,8 +191,11 @@ final class Photo
             $take([$row], static fn (): bool => true);
         }
 
+        if ($first) {
+            unset($picked[(int) $first['album_id']]);
+        }
         $reel = array_values($picked);
         shuffle($reel);
-        return $reel;
+        return $first ? [$first, ...$reel] : $reel;
     }
 }

@@ -26,10 +26,7 @@ final class PublicController extends Controller
         if ($hero !== null && $hero['album_status'] !== 'published') {
             $hero = null;
         }
-        $reel = Photo::heroReel($hero ? 7 : 8, $hero ? (int) $hero['id'] : 0, Setting::heroReelPlaces(), Setting::heroReelNight());
-        if ($hero) {
-            array_unshift($reel, $hero);
-        }
+        $reel = Photo::heroReel(8, $hero, Setting::heroReelPlaces(), Setting::heroReelNight());
 
         $this->render('public/home', [
             'meta' => [
