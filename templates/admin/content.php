@@ -1,5 +1,5 @@
 <?php
-/** @var string $tagline @var string $skyIntro @var ?array $hero @var array $page */
+/** @var string $tagline @var string $skyIntro @var string $reelPlaces @var int $reelNight @var ?array $hero @var array $page */
 use App\Services\PresentationImages;
 ?>
 <h1>Contenus</h1>
@@ -22,6 +22,14 @@ use App\Services\PresentationImages;
         <p class="hint">Aucune. Choisissez-la avec le bouton « Photo d'accueil » sur une photo, dans un album.</p>
       <?php endif; ?>
     </div>
+    <label>Lieux toujours présents dans le diaporama d'accueil
+      <input type="text" name="hero_reel_places" maxlength="300" value="<?= e($reelPlaces) ?>" placeholder="Arras, Paris">
+      <span class="hint">Séparés par des virgules. Une photo d'un album dont le titre ou le lieu contient chaque nom est toujours incluse ; le reste est tiré au hasard.</span>
+    </label>
+    <label>Photos de nuit dans le diaporama d'accueil
+      <input type="number" name="hero_reel_night" min="0" max="8" value="<?= (int) $reelNight ?>">
+      <span class="hint">Reconnues à leur pose longue (une demi-seconde ou plus) ou à un mot comme « nuit », « illuminé » ou « heure bleue » dans le titre ou la légende.</span>
+    </label>
   </section>
 
   <section class="panel form">

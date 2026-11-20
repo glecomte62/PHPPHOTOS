@@ -21,6 +21,8 @@ final class ContentController extends AdminController
             'title' => 'Contenus',
             'tagline' => (string) Setting::get('site_tagline', ''),
             'skyIntro' => (string) Setting::get('sky_intro', ''),
+            'reelPlaces' => implode(', ', Setting::heroReelPlaces()),
+            'reelNight' => Setting::heroReelNight(),
             'hero' => $heroId > 0 ? Photo::find($heroId) : null,
             'page' => $page,
         ]);
@@ -32,6 +34,8 @@ final class ContentController extends AdminController
         $this->verifyCsrf();
         Setting::set('site_tagline', mb_substr(trim((string) ($_POST['site_tagline'] ?? '')), 0, 150));
         Setting::set('sky_intro', trim((string) ($_POST['sky_intro'] ?? '')));
+        Setting::set('hero_reel_places', mb_substr(trim((string) ($_POST['hero_reel_places'] ?? '')), 0, 300));
+        Setting::set('hero_reel_night', (string) max(0, min(8, (int) ($_POST['hero_reel_night'] ?? 0))));
 
         $title = trim((string) ($_POST['title'] ?? ''));
         $lead = mb_substr(trim((string) ($_POST['lead'] ?? '')), 0, 300);

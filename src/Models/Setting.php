@@ -16,6 +16,19 @@ final class Setting
         return self::$cache[$key] ?? $default;
     }
 
+    /** Lieux toujours présents dans le diaporama d'accueil. @return list<string> */
+    public static function heroReelPlaces(): array
+    {
+        $raw = (string) self::get('hero_reel_places', 'Arras, Paris');
+        return array_values(array_filter(array_map('trim', explode(',', $raw)), static fn (string $p): bool => $p !== ''));
+    }
+
+    /** Nombre de photos de nuit toujours présentes dans le diaporama d'accueil. */
+    public static function heroReelNight(): int
+    {
+        return max(0, min(8, (int) self::get('hero_reel_night', '2')));
+    }
+
     public static function set(string $key, ?string $value): void
     {
         Database::run(

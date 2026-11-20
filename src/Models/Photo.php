@@ -133,4 +133,63 @@ final class Photo
             [$themeId]
         );
     }
+
+    /**
+     * Photo de nuit : pose d'une demi-seconde ou plus (l'heure de prise de vue n'est pas fiable,
+     * l'appareil restant à l'heure française en voyage), ou titre/légende qui l'annonce.
+     */
+    private const NIGHT = "((p.shutter NOT LIKE '1/%' AND CAST(p.shutter AS DECIMAL(10,2)) >= 0.5)
+        OR CONCAT_WS(' ', p.title, p.caption) REGEXP 'nuit|nocturne|illumin|minuit|heure bleue')";
+
+    /**
+     * Photos du diaporama d'accueil : des vues en paysage tirées au hasard dans les albums publiés,
+     * une seule par album pour varier les sujets. Y figurent toujours $nightCount photos de nuit et
+     * une photo de chaque lieu de $places (cherché dans le titre et le lieu de l'album, sans tenir
+     * compte des accents ni de la casse) ; le reste est complété au hasard.
+     *
+     * @param list<string> $places
+     * @return list<array<string, mixed>>
+     */
+    public static function heroReel(int $limit, int $excludeId = 0, array $places = [], int $nightCount = 0): array
+    {
+        $base = self::SELECT . " WHERE a.status = 'published' AND p.width >= p.height * 1.3 AND p.id <> ?";
+        $rows = Database::all($base . ' ORDER BY RAND() LIMIT 300', [$excludeId]);
+        $night = $nightCount > 0 ? Database::all($base . ' AND ' . self::NIGHT . ' ORDER BY RAND() LIMIT 100', [$excludeId]) : [];
+
+        $fold = static function (string $s): string {
+            $decomposed = class_exists(\Normalizer::class) ? \Normalizer::normalize($s, \Normalizer::FORM_D) : false;
+            return mb_strtolower(is_string($decomposed) ? (string) preg_replace('/\p{Mn}/u', '', $decomposed) : $s);
+        };
+        $albumText = static fn (array $row): string => $fold($row['album_title'] . ' ' . $row['location']);
+
+        /** @var array<int, array<string, mixed>> $picked une photo par album */
+        $picked = [];
+        $take = static function (array $candidates, callable $accept) use (&$picked, $limit): void {
+            foreach ($candidates as $row) {
+                $albumId = (int) $row['album_id'];
+                if (count($picked) < $limit && !isset($picked[$albumId]) && $accept($row)) {
+                    $picked[$albumId] = $row;
+                    return;
+                }
+            }
+        };
+
+        for ($i = 0; $i < $nightCount; $i++) {
+            $take($night, static fn (): bool => true);
+        }
+        foreach ($places as $place) {
+            $needle = $fold(trim($place));
+            $alreadyThere = array_filter($picked, static fn (array $row): bool => str_contains($albumText($row), $needle));
+            if ($needle !== '' && $alreadyThere === []) {
+                $take($rows, static fn (array $row): bool => str_contains($albumText($row), $needle));
+            }
+        }
+        foreach ($rows as $row) {
+            $take([$row], static fn (): bool => true);
+        }
+
+        $reel = array_values($picked);
+        shuffle($reel);
+        return $reel;
+    }
 }

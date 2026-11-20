@@ -83,7 +83,32 @@ a { color: inherit; }
 .empty { text-align: center; color: var(--muted); }
 
 /* Accueil */
-.hero__img { width: 100%; height: min(80vh, 900px); object-fit: cover; }
+.hero { position: relative; height: min(80vh, 900px); overflow: hidden; background: var(--ink); }
+.hero__slide { position: absolute; inset: 0; display: block; opacity: 0; transition: opacity 1.8s ease-in-out; }
+.hero__slide.is-active { opacity: 1; z-index: 1; }
+.hero__img { display: block; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 50%; }
+.hero__caption {
+  position: absolute; left: var(--gutter); bottom: 22px; color: #fff; font-family: var(--serif); font-style: italic;
+  font-size: clamp(1rem, 1.6vw, 1.25rem); text-shadow: 0 1px 6px rgba(0, 0, 0, .55);
+  opacity: 0; transition: opacity 1s ease .8s;
+}
+.hero__slide.is-active .hero__caption { opacity: .92; }
+.hero__toggle {
+  position: absolute; right: var(--gutter); bottom: 18px; z-index: 2; width: 36px; height: 36px; border: 0; border-radius: 50%;
+  background: rgba(0, 0, 0, .35); color: #fff; font-size: 11px; letter-spacing: -1px; cursor: pointer;
+}
+.hero__toggle:hover, .hero__toggle:focus-visible { background: rgba(0, 0, 0, .6); }
+@keyframes hero-zoom-in { from { transform: scale(1); } to { transform: scale(1.12) translate(-1.5%, -1%); } }
+@keyframes hero-zoom-out { from { transform: scale(1.12) translate(1.5%, 1%); } to { transform: scale(1); } }
+.hero--reel .hero__slide.is-active .hero__img,
+.hero--reel .hero__slide.is-leaving .hero__img { animation: hero-zoom-in 9s ease-out both; }
+.hero--reel .hero__slide:nth-child(even).is-active .hero__img,
+.hero--reel .hero__slide:nth-child(even).is-leaving .hero__img { animation-name: hero-zoom-out; }
+.hero--reel.is-paused .hero__img { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .hero--reel .hero__img { animation: none !important; }
+  .hero__slide { transition-duration: .01s; }
+}
 .intro { padding: 40px var(--gutter) 0; text-align: center; }
 .intro__tagline { margin: 0; font-family: var(--serif); font-style: italic; font-size: clamp(1.4rem, 3vw, 2rem); }
 .sky {

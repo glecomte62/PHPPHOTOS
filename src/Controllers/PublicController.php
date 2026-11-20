@@ -26,6 +26,10 @@ final class PublicController extends Controller
         if ($hero !== null && $hero['album_status'] !== 'published') {
             $hero = null;
         }
+        $reel = Photo::heroReel($hero ? 7 : 8, $hero ? (int) $hero['id'] : 0, Setting::heroReelPlaces(), Setting::heroReelNight());
+        if ($hero) {
+            array_unshift($reel, $hero);
+        }
 
         $this->render('public/home', [
             'meta' => [
@@ -39,6 +43,8 @@ final class PublicController extends Controller
                 ],
             ],
             'hero' => $hero,
+            'reel' => $reel,
+            'scripts' => count($reel) > 1 ? [asset('js/hero-reel.js')] : [],
             'tagline' => (string) Setting::get('site_tagline', 'Photographe & pilote ULM'),
             'featured' => $featured,
             'skyPhotos' => $featured ? Photo::latestInTheme((int) $featured['id'], 5) : [],

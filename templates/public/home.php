@@ -1,6 +1,7 @@
 <?php
 /**
  * @var ?array $hero
+ * @var list<array> $reel
  * @var string $tagline
  * @var ?array $featured
  * @var list<array> $skyPhotos
@@ -9,9 +10,19 @@
  * @var list<array> $themes
  */
 ?>
-<?php if ($hero): ?>
-<section class="hero">
-  <?= $view->partial('partials/picture', ['key' => $hero['file_key'], 'alt' => photo_label($hero['title'], $hero['album_title']), 'sizes' => '100vw', 'loading' => 'eager', 'class' => 'hero__img']) ?>
+<?php if ($reel): ?>
+<section class="hero<?= count($reel) > 1 ? ' hero--reel' : '' ?>" aria-roledescription="carrousel" aria-label="Photos à la une">
+  <?php foreach ($reel as $i => $p): ?>
+    <a class="hero__slide<?= $i === 0 ? ' is-active' : '' ?>" href="/<?= e($p['theme_slug']) ?>/<?= e($p['album_slug']) ?>/photo/<?= (int) $p['id'] ?>"<?= $i === 0 ? '' : ' tabindex="-1" aria-hidden="true"' ?>>
+      <?= $view->partial('partials/picture', ['key' => $p['file_key'], 'alt' => photo_label($p['title'], $p['album_title']), 'sizes' => '100vw', 'loading' => $i === 0 ? 'eager' : 'lazy', 'class' => 'hero__img']) ?>
+      <span class="hero__caption"><?= e($p['album_title']) ?></span>
+    </a>
+  <?php endforeach; ?>
+  <?php if (count($reel) > 1): ?>
+    <button type="button" class="hero__toggle" aria-label="Mettre le diaporama en pause" hidden>
+      <span aria-hidden="true">❚❚</span>
+    </button>
+  <?php endif; ?>
 </section>
 <?php endif; ?>
 
@@ -66,7 +77,7 @@
 </section>
 <?php endif; ?>
 
-<?php if (!$hero && !$featured && !$latest && !$themes): ?>
+<?php if (!$reel && !$featured && !$latest && !$themes): ?>
 <section class="section empty" id="galeries">
   <p>Les premières galeries arrivent bientôt.</p>
 </section>
