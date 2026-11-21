@@ -6,6 +6,7 @@ namespace App\Services;
 final class ImageProcessor
 {
     public const WIDTHS = [480, 1280, 2560];
+    private const CONVERT_ATTEMPTS = 3;
 
     public function __construct(
         private int $maxPixels = 60_000_000,
@@ -194,7 +195,18 @@ final class ImageProcessor
         $cmd = escapeshellarg($bin) . ' -limit memory 256MiB -limit map 512MiB -define ' . escapeshellarg('jpeg:size=' . $side) . ' '
             . escapeshellarg($source) . ' -profile ' . escapeshellarg($icc)
             . ' -resize ' . escapeshellarg($side . '^>') . ' -quality 96 ' . escapeshellarg('jpeg:' . $tmp) . ' 2>&1';
-        exec($cmd, $output, $code);
+        // La limite mémoire du compte (LVE) tue souvent la première conversion (code 137) ; la suivante passe.
+        for ($attempt = 1; $attempt <= self::CONVERT_ATTEMPTS; $attempt++) {
+            $output = [];
+            exec($cmd, $output, $code);
+            if ($code !== 137) {
+                break;
+            }
+            if ($attempt < self::CONVERT_ATTEMPTS) {
+                gc_collect_cycles();
+                sleep(1);
+            }
+        }
         $info = $code === 0 ? @getimagesize($tmp) : false;
         if ($info === false || $info[2] !== IMAGETYPE_JPEG) {
             error_log("ImageProcessor : conversion sRGB échouée ($code) : " . implode(' ', $output));
