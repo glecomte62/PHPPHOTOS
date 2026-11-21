@@ -57,10 +57,50 @@ CREATE TABLE IF NOT EXISTS photos (
   iso INT UNSIGNED NULL,
   lat DECIMAL(10,7) NULL,
   lng DECIMAL(10,7) NULL,
+  views INT UNSIGNED NOT NULL DEFAULT 0,
+  likes INT UNSIGNED NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY idx_album_position (album_id, position),
   KEY idx_album_hash (album_id, file_hash),
   CONSTRAINT fk_photos_album FOREIGN KEY (album_id) REFERENCES albums(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS tags (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  slug VARCHAR(90) NOT NULL UNIQUE,
+  name VARCHAR(60) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS photo_tags (
+  photo_id INT UNSIGNED NOT NULL,
+  tag_id INT UNSIGNED NOT NULL,
+  PRIMARY KEY (photo_id, tag_id),
+  KEY idx_tag (tag_id),
+  CONSTRAINT fk_photo_tags_photo FOREIGN KEY (photo_id) REFERENCES photos(id) ON DELETE CASCADE,
+  CONSTRAINT fk_photo_tags_tag FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS photo_likes (
+  photo_id INT UNSIGNED NOT NULL,
+  voter CHAR(64) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (photo_id, voter),
+  CONSTRAINT fk_photo_likes_photo FOREIGN KEY (photo_id) REFERENCES photos(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS comments (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  photo_id INT UNSIGNED NOT NULL,
+  author_name VARCHAR(100) NOT NULL,
+  message TEXT NOT NULL,
+  status ENUM('pending','approved') NOT NULL DEFAULT 'pending',
+  ip_hash CHAR(64) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  approved_at DATETIME NULL,
+  KEY idx_photo_status (photo_id, status),
+  KEY idx_status_created (status, created_at),
+  CONSTRAINT fk_comments_photo FOREIGN KEY (photo_id) REFERENCES photos(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS pages (

@@ -6,10 +6,12 @@ namespace App\Controllers\Admin;
 use App\Models\Album;
 use App\Models\Photo;
 use App\Models\Setting;
+use App\Models\Tag;
 use App\Models\Theme;
 use App\Services\ExifReader;
 use App\Services\ImageException;
 use App\Services\ImageProcessor;
+use App\Services\TagList;
 
 final class PhotoController extends AdminController
 {
@@ -57,6 +59,9 @@ final class PhotoController extends AdminController
             json_response(['error' => $e->getMessage()], 422);
         }
 
+        // Les mots-clés communs à tout l'album s'appliquent aussi aux nouvelles photos
+        $albumTags = Tag::commonToAlbum($albumId);
+
         try {
             $id = Photo::create([
                 'album_id' => $albumId,
@@ -82,6 +87,9 @@ final class PhotoController extends AdminController
         } finally {
             @unlink($file['tmp_name']);
         }
+        if ($albumTags !== []) {
+            Tag::setForPhoto($id, $albumTags);
+        }
 
         json_response([
             'id' => $id,
@@ -90,8 +98,33 @@ final class PhotoController extends AdminController
                 'album' => Album::find($albumId),
                 'albums' => Album::allForAdmin(),
                 'heroId' => (int) Setting::get('hero_photo_id', '0'),
+                'tags' => $albumTags,
             ]),
         ], 201);
+    }
+
+    /** Ajoute des mots-clés à toutes les photos de l'album. */
+    public function addAlbumTags(int $albumId): void
+    {
+        $this->verifyCsrf();
+        Album::find($albumId) ?? $this->abort404('Album introuvable.');
+        $names = TagList::parse((string) ($_POST['tags'] ?? ''));
+        $count = $names !== [] ? Tag::addToAlbum($albumId, $names) : 0;
+        flash($names !== [] ? 'success' : 'error', $names !== []
+            ? 'Mots-clés ajoutés à ' . $count . ' photo' . ($count > 1 ? 's' : '') . ' : ' . TagList::join($names) . '.'
+            : 'Aucun mot-clé saisi.');
+        redirect('/admin/albums/' . $albumId . '/photos');
+    }
+
+    /** Retire un mot-clé de toutes les photos de l'album. */
+    public function removeAlbumTag(int $albumId): void
+    {
+        $this->verifyCsrf();
+        Album::find($albumId) ?? $this->abort404('Album introuvable.');
+        $name = (string) ($_POST['tag'] ?? '');
+        Tag::removeFromAlbum($albumId, $name);
+        flash('success', 'Mot-clé « ' . $name . ' » retiré des photos de l\'album.');
+        redirect('/admin/albums/' . $albumId . '/photos');
     }
 
     public function update(int $id): void
@@ -103,6 +136,9 @@ final class PhotoController extends AdminController
             'title' => mb_substr(trim((string) ($_POST['title'] ?? '')), 0, 190),
             'caption' => $caption !== '' ? $caption : null,
         ]);
+        if (isset($_POST['tags_sent'])) {
+            Tag::setForPhoto($id, TagList::parse((string) ($_POST['tags'] ?? '')));
+        }
         $this->done($photo, 'Photo enregistrée.');
     }
 

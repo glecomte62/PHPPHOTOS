@@ -8,6 +8,7 @@ use App\Models\Photo;
 use App\Models\Setting;
 use App\Services\HtmlSanitizer;
 use App\Services\ImageException;
+use App\Services\License;
 use App\Services\PresentationImages;
 
 final class ContentController extends AdminController
@@ -25,6 +26,8 @@ final class ContentController extends AdminController
             'reelNight' => Setting::heroReelNight(),
             'hero' => $heroId > 0 ? Photo::find($heroId) : null,
             'page' => $page,
+            'license' => License::get(Setting::get('photo_license')),
+            'downloads' => Setting::get('downloads_enabled', '0') === '1',
         ]);
     }
 
@@ -36,6 +39,8 @@ final class ContentController extends AdminController
         Setting::set('sky_intro', trim((string) ($_POST['sky_intro'] ?? '')));
         Setting::set('hero_reel_places', mb_substr(trim((string) ($_POST['hero_reel_places'] ?? '')), 0, 300));
         Setting::set('hero_reel_night', (string) max(0, min(8, (int) ($_POST['hero_reel_night'] ?? 0))));
+        Setting::set('photo_license', License::get(is_string($_POST['photo_license'] ?? null) ? $_POST['photo_license'] : null)['code']);
+        Setting::set('downloads_enabled', isset($_POST['downloads_enabled']) ? '1' : '0');
 
         $title = trim((string) ($_POST['title'] ?? ''));
         $lead = mb_substr(trim((string) ($_POST['lead'] ?? '')), 0, 300);

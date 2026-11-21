@@ -5,6 +5,11 @@
   <?php $meta = implode(' · ', array_filter([(string) $album['location'], format_date_fr($album['shot_on'])])); ?>
   <?php if ($meta !== ''): ?><p class="page-meta"><?= e($meta) ?></p><?php endif; ?>
   <?php if ($album['description']): ?><p class="page-intro"><?= nl2br(e($album['description'])) ?></p><?php endif; ?>
+  <?php if (count($photos) > 1): ?>
+    <p class="album-actions"><button class="slideshow-start" type="button" data-slideshow hidden>
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg> Diaporama
+    </button></p>
+  <?php endif; ?>
   <?php if ($album['status'] !== 'published'): ?><p class="draft-badge">Brouillon : visible uniquement par vous</p><?php endif; ?>
   <?= $view->partial('partials/trace') ?>
 </header>
@@ -22,6 +27,6 @@
 </section>
 
 <script type="application/json" id="viewer-data"><?= json_encode(
-    ['base' => $baseUrl, 'open' => $openIndex, 'photos' => $viewerPhotos],
+    ['base' => $baseUrl, 'open' => $openIndex, 'photos' => $viewerPhotos, 'ts' => $commentToken],
     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_INVALID_UTF8_SUBSTITUTE
 ) ?></script>

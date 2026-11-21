@@ -1,5 +1,7 @@
 <?php
-/** @var array $photo @var array $album @var list<array> $albums @var int $heroId */
+/** @var array $photo @var array $album @var list<array> $albums @var int $heroId @var ?list<string> $tags */
+use App\Services\TagList;
+
 $id = (int) $photo['id'];
 $isCover = (int) ($album['cover_photo_id'] ?? 0) === $id;
 $isHero = (int) ($heroId ?? 0) === $id;
@@ -19,6 +21,8 @@ $otherAlbums = array_filter($albums, static fn (array $a): bool => (int) $a['id'
     <?= csrf_field() ?>
     <input type="text" name="title" maxlength="190" value="<?= e($photo['title']) ?>" placeholder="Titre" aria-label="Titre">
     <textarea name="caption" placeholder="Légende (facultatif)" aria-label="Légende"><?= e($photo['caption']) ?></textarea>
+    <input type="text" name="tags" maxlength="600" value="<?= e(TagList::join($tags ?? [])) ?>" placeholder="Mots-clés, séparés par des virgules" aria-label="Mots-clés">
+    <input type="hidden" name="tags_sent" value="1">
     <noscript><button class="btn btn--small" type="submit">Enregistrer</button></noscript>
     <span class="save-status" aria-live="polite"></span>
   </form>

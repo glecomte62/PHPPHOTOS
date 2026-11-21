@@ -4,11 +4,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Services\Database;
+use App\Services\Geo;
+use App\Services\PhotoFilter;
 use App\Services\SearchQuery;
 
 final class Photo
 {
-    private const SELECT = 'SELECT p.*, a.slug AS album_slug, a.title AS album_title, a.status AS album_status,
+    private const SELECT = 'SELECT p.*, a.slug AS album_slug, a.title AS album_title, a.status AS album_status, a.location AS album_location,
         a.theme_id, t.slug AS theme_slug
         FROM photos p JOIN albums a ON a.id = p.album_id JOIN themes t ON t.id = a.theme_id';
 
@@ -102,27 +104,240 @@ final class Photo
      * @param list<string> $terms
      * @return list<array<string, mixed>>
      */
-    public static function search(array $terms, int $limit): array
+    public static function search(array $terms, PhotoFilter $filter, int $limit, int $offset = 0): array
     {
-        if ($terms === []) {
+        if ($terms === [] && $filter->isEmpty()) {
             return [];
         }
-        $where = [];
+        [$where, $params] = self::searchWhere($terms, $filter);
         $score = [];
-        $whereParams = [];
         $scoreParams = [];
         foreach ($terms as $term) {
             $like = SearchQuery::likePattern($term);
-            $where[] = "CONCAT_WS(' ', p.title, p.caption, a.title, a.location, t.title) LIKE ?";
-            $whereParams[] = $like;
             $score[] = '(p.title LIKE ?) * 3 + (COALESCE(p.caption, \'\') LIKE ?) * 2';
             array_push($scoreParams, $like, $like);
         }
+        // Sans texte, les photos les plus récentes d'abord
+        $order = $score !== []
+            ? '(' . implode(' + ', $score) . ') DESC, a.published_at DESC, p.position, p.id'
+            : 'p.taken_at IS NULL, p.taken_at DESC, p.id DESC';
         return Database::all(
-            self::SELECT . " WHERE a.status = 'published' AND " . implode(' AND ', $where)
-            . ' ORDER BY (' . implode(' + ', $score) . ') DESC, a.published_at DESC, p.position, p.id LIMIT ' . (int) $limit,
-            [...$whereParams, ...$scoreParams]
+            self::SELECT . ' WHERE ' . $where . ' ORDER BY ' . $order
+            . ' LIMIT ' . (int) $limit . ' OFFSET ' . max(0, (int) $offset),
+            [...$params, ...$scoreParams]
         );
+    }
+
+    /** @param list<string> $terms */
+    public static function countSearch(array $terms, PhotoFilter $filter): int
+    {
+        if ($terms === [] && $filter->isEmpty()) {
+            return 0;
+        }
+        [$where, $params] = self::searchWhere($terms, $filter);
+        return (int) Database::value(
+            'SELECT COUNT(*) FROM photos p JOIN albums a ON a.id = p.album_id JOIN themes t ON t.id = a.theme_id WHERE ' . $where,
+            $params
+        );
+    }
+
+    /**
+     * Valeurs proposées dans les filtres, avec leur nombre de photos publiées.
+     *
+     * @return array{camera: list<array{value: string, n: int}>, lens: list<array{value: string, n: int}>,
+     *               year: list<array{value: int, n: int}>, theme: list<array{value: string, label: string, n: int}>}
+     */
+    public static function facets(): array
+    {
+        $from = " FROM photos p JOIN albums a ON a.id = p.album_id JOIN themes t ON t.id = a.theme_id WHERE a.status = 'published'";
+        $column = static fn (string $expr, string $order): array => array_map(
+            static fn (array $r): array => ['value' => $r['value'], 'n' => (int) $r['n']],
+            Database::all("SELECT $expr AS value, COUNT(*) AS n$from AND $expr IS NOT NULL AND $expr <> '' GROUP BY value ORDER BY $order")
+        );
+        return [
+            'camera' => $column('p.camera', 'n DESC, value'),
+            'lens' => $column('p.lens', 'n DESC, value'),
+            'year' => array_map(
+                static fn (array $r): array => ['value' => (int) $r['value'], 'n' => $r['n']],
+                $column('YEAR(p.taken_at)', 'value DESC')
+            ),
+            'theme' => array_map(
+                static fn (array $r): array => ['value' => $r['slug'], 'label' => $r['title'], 'n' => (int) $r['n']],
+                Database::all("SELECT t.slug, t.title, COUNT(*) AS n$from GROUP BY t.id, t.slug, t.title, t.position ORDER BY t.position, t.id")
+            ),
+        ];
+    }
+
+    public static function addView(int $id): void
+    {
+        Database::run('UPDATE photos SET views = views + 1 WHERE id = ?', [$id]);
+    }
+
+    /**
+     * Ajoute ou retire le « j'aime » d'un navigateur, puis renvoie le nombre de « j'aime » de la photo.
+     */
+    public static function setLike(int $id, string $voter, bool $like): int
+    {
+        return (int) Database::transaction(static function () use ($id, $voter, $like): int {
+            if ($like) {
+                Database::run('INSERT IGNORE INTO photo_likes (photo_id, voter) VALUES (?, ?)', [$id, $voter]);
+            } else {
+                Database::run('DELETE FROM photo_likes WHERE photo_id = ? AND voter = ?', [$id, $voter]);
+            }
+            Database::run('UPDATE photos SET likes = (SELECT COUNT(*) FROM photo_likes WHERE photo_id = ?) WHERE id = ?', [$id, $id]);
+            return (int) Database::value('SELECT likes FROM photos WHERE id = ?', [$id]);
+        });
+    }
+
+    /** Photos publiées les plus vues (« vues ») ou les plus aimées (« aimees »). @return list<array<string, mixed>> */
+    public static function popular(string $by, int $limit): array
+    {
+        $column = $by === 'aimees' ? 'p.likes' : 'p.views';
+        return Database::all(
+            self::SELECT . " WHERE a.status = 'published' AND $column > 0 ORDER BY $column DESC, p.likes + p.views DESC, p.id DESC LIMIT " . (int) $limit
+        );
+    }
+
+    /** @return array{views: int, likes: int} totaux des albums publiés */
+    public static function totals(): array
+    {
+        $row = Database::one("SELECT COALESCE(SUM(p.views), 0) AS views, COALESCE(SUM(p.likes), 0) AS likes FROM photos p JOIN albums a ON a.id = p.album_id WHERE a.status = 'published'");
+        return ['views' => (int) ($row['views'] ?? 0), 'likes' => (int) ($row['likes'] ?? 0)];
+    }
+
+    /** Photos publiées portant un mot-clé, les plus récentes d'abord. @return list<array<string, mixed>> */
+    public static function forTag(int $tagId, int $limit, int $offset = 0): array
+    {
+        return Database::all(
+            self::SELECT . " JOIN photo_tags pt ON pt.photo_id = p.id WHERE pt.tag_id = ? AND a.status = 'published'
+             ORDER BY p.taken_at IS NULL, p.taken_at DESC, p.id DESC LIMIT " . (int) $limit . ' OFFSET ' . max(0, $offset),
+            [$tagId]
+        );
+    }
+
+    public static function countForTag(int $tagId): int
+    {
+        return (int) Database::value(
+            "SELECT COUNT(*) FROM photos p JOIN albums a ON a.id = p.album_id JOIN photo_tags pt ON pt.photo_id = p.id
+             WHERE pt.tag_id = ? AND a.status = 'published'",
+            [$tagId]
+        );
+    }
+
+    /**
+     * Nombre de photos publiées par année et par mois de prise de vue (les plus récentes d'abord).
+     *
+     * @return list<array{year: int, month: int, n: int}>
+     */
+    public static function archive(): array
+    {
+        return array_map(
+            static fn (array $r): array => ['year' => (int) $r['y'], 'month' => (int) $r['m'], 'n' => (int) $r['n']],
+            Database::all(
+                "SELECT YEAR(p.taken_at) AS y, MONTH(p.taken_at) AS m, COUNT(*) AS n
+                 FROM photos p JOIN albums a ON a.id = p.album_id
+                 WHERE a.status = 'published' AND p.taken_at IS NOT NULL
+                 GROUP BY y, m ORDER BY y DESC, m DESC"
+            )
+        );
+    }
+
+    /**
+     * Fil chronologique : photos publiées, des plus récentes aux plus anciennes, éventuellement
+     * limitées à une année ou à un mois de prise de vue.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function stream(?int $year, ?int $month, int $limit, int $offset = 0): array
+    {
+        [$where, $params] = self::streamWhere($year, $month);
+        return Database::all(
+            self::SELECT . " WHERE $where ORDER BY p.taken_at IS NULL, p.taken_at DESC, p.id DESC LIMIT " . (int) $limit . ' OFFSET ' . max(0, $offset),
+            $params
+        );
+    }
+
+    public static function countStream(?int $year, ?int $month): int
+    {
+        [$where, $params] = self::streamWhere($year, $month);
+        return (int) Database::value("SELECT COUNT(*) FROM photos p JOIN albums a ON a.id = p.album_id WHERE $where", $params);
+    }
+
+    /** @return array{0: string, 1: list<int>} */
+    private static function streamWhere(?int $year, ?int $month): array
+    {
+        $where = "a.status = 'published'";
+        $params = [];
+        if ($year !== null) {
+            $where .= ' AND YEAR(p.taken_at) = ?';
+            $params[] = $year;
+            if ($month !== null) {
+                $where .= ' AND MONTH(p.taken_at) = ?';
+                $params[] = $month;
+            }
+        }
+        return [$where, $params];
+    }
+
+    /**
+     * Photos publiées d'autres albums prises à moins de $km de la photo, les plus proches d'abord.
+     *
+     * @param array<string, mixed> $photo
+     * @return list<array<string, mixed>> lignes complétées d'une clé « distance_km »
+     */
+    public static function nearby(array $photo, float $km, int $limit): array
+    {
+        if ($photo['lat'] === null || $photo['lng'] === null) {
+            return [];
+        }
+        $lat = (float) $photo['lat'];
+        $lng = (float) $photo['lng'];
+        $box = Geo::boundingBox($lat, $lng, $km);
+        $rows = Database::all(
+            self::SELECT . " WHERE a.status = 'published' AND p.album_id <> ? AND p.lat BETWEEN ? AND ? AND p.lng BETWEEN ? AND ?",
+            [(int) $photo['album_id'], $box['minLat'], $box['maxLat'], $box['minLng'], $box['maxLng']]
+        );
+        foreach ($rows as &$row) {
+            $row['distance_km'] = Geo::distanceKm($lat, $lng, (float) $row['lat'], (float) $row['lng']);
+        }
+        unset($row);
+        $rows = array_values(array_filter($rows, static fn (array $r): bool => $r['distance_km'] <= $km));
+        usort($rows, static fn (array $a, array $b): int => $a['distance_km'] <=> $b['distance_km']);
+        // Deux photos par album au plus, pour varier les suggestions
+        $picked = [];
+        $perAlbum = [];
+        foreach ($rows as $row) {
+            $albumId = (int) $row['album_id'];
+            if (($perAlbum[$albumId] ?? 0) < 2) {
+                $perAlbum[$albumId] = ($perAlbum[$albumId] ?? 0) + 1;
+                $picked[] = $row;
+            }
+            if (count($picked) === $limit) {
+                break;
+            }
+        }
+        return $picked;
+    }
+
+    /**
+     * @param list<string> $terms
+     * @return array{0: string, 1: list<mixed>}
+     */
+    private static function searchWhere(array $terms, PhotoFilter $filter): array
+    {
+        $where = ["a.status = 'published'"];
+        $params = [];
+        foreach ($terms as $term) {
+            $where[] = "CONCAT_WS(' ', p.title, p.caption, a.title, a.location, t.title,
+                (SELECT GROUP_CONCAT(tg.name SEPARATOR ' ') FROM photo_tags ptg JOIN tags tg ON tg.id = ptg.tag_id WHERE ptg.photo_id = p.id)) LIKE ?";
+            $params[] = SearchQuery::likePattern($term);
+        }
+        [$filterSql, $filterParams] = $filter->sql();
+        if ($filterSql !== '') {
+            $where[] = $filterSql;
+            array_push($params, ...$filterParams);
+        }
+        return [implode(' AND ', $where), $params];
     }
 
     /** @return list<array<string, mixed>> */
@@ -163,7 +378,7 @@ final class Photo
             $decomposed = class_exists(\Normalizer::class) ? \Normalizer::normalize($s, \Normalizer::FORM_D) : false;
             return mb_strtolower(is_string($decomposed) ? (string) preg_replace('/\p{Mn}/u', '', $decomposed) : $s);
         };
-        $albumText = static fn (array $row): string => $fold($row['album_title'] . ' ' . $row['location']);
+        $albumText = static fn (array $row): string => $fold($row['album_title'] . ' ' . $row['album_location']);
 
         /** @var array<int, array<string, mixed>> $picked une photo par album */
         $picked = $first ? [(int) $first['album_id'] => $first] : [];

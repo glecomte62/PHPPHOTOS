@@ -48,7 +48,7 @@ final class ContactForm
         return ['data' => ['name' => $name, 'email' => $email, 'message' => $message], 'errors' => $errors, 'spam' => $spam];
     }
 
-    private static function tokenIsValid(string $token, string $key, int $now): bool
+    public static function tokenIsValid(string $token, string $key, int $now): bool
     {
         if (!preg_match('/^(\d+)\.([a-f0-9]{64})$/', $token, $m)) {
             return false;

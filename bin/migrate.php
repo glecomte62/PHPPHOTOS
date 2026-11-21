@@ -35,3 +35,7 @@ if (!$hasColumn('photos', 'original_name')) {
     Database::pdo()->exec('ALTER TABLE photos ADD COLUMN original_name VARCHAR(190) NULL AFTER file_hash');
     echo "OK photos.original_name ajoutée\n";
 }
+if (!$hasColumn('photos', 'views')) {
+    Database::pdo()->exec('ALTER TABLE photos ADD COLUMN views INT UNSIGNED NOT NULL DEFAULT 0 AFTER lng, ADD COLUMN likes INT UNSIGNED NOT NULL DEFAULT 0 AFTER views');
+    echo "OK photos.views et photos.likes ajoutées\n";
+}

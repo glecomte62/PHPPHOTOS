@@ -16,6 +16,7 @@ $canonical = absolute_url((string) (parse_url($_SERVER['REQUEST_URI'] ?? '/', PH
 <?php if ($meta['robots']): ?>
 <meta name="robots" content="<?= e($meta['robots']) ?>">
 <?php endif; ?>
+<link rel="alternate" type="application/rss+xml" title="Nouveaux albums — Guillaume Lecomte" href="/rss.xml">
 <link rel="search" type="application/opensearchdescription+xml" title="Guillaume Lecomte" href="/opensearch.xml">
 <meta property="og:site_name" content="<?= e($siteName) ?>">
 <meta property="og:locale" content="fr_FR">

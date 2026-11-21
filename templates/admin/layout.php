@@ -15,6 +15,8 @@
   <nav>
     <a href="/admin/themes">Thèmes</a>
     <a href="/admin/albums">Albums</a>
+    <?php $pendingComments = \App\Models\Comment::countPending(); ?>
+    <a href="/admin/commentaires">Commentaires<?php if ($pendingComments > 0): ?> <span class="badge badge--featured" title="À valider"><?= $pendingComments ?></span><?php endif; ?></a>
     <a href="/admin/content">Contenus</a>
     <a href="/" target="_blank" rel="noopener">Voir le site ↗</a>
   </nav>

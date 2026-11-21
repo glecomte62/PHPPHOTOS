@@ -6,6 +6,7 @@ namespace App\Controllers\Admin;
 use App\Models\Album;
 use App\Models\Photo;
 use App\Models\Setting;
+use App\Models\Tag;
 use App\Models\Theme;
 use App\Services\ImageProcessor;
 
@@ -96,10 +97,16 @@ final class AlbumController extends AdminController
     public function photos(int $id): void
     {
         $album = Album::find($id) ?? $this->abort404('Album introuvable.');
+        $photos = Photo::forAlbum($id);
         $this->page('admin/albums/photos', [
             'title' => $album['title'],
             'album' => $album,
-            'photos' => Photo::forAlbum($id),
+            'photos' => $photos,
+            'photoTags' => array_map(
+                static fn (array $list): array => array_column($list, 'name'),
+                Tag::forPhotos(array_map(static fn (array $p): int => (int) $p['id'], $photos))
+            ),
+            'albumTags' => Tag::commonToAlbum($id),
             'albums' => Album::allForAdmin(),
             'heroId' => (int) Setting::get('hero_photo_id', '0'),
             'scripts' => [asset('js/admin-upload.js')],

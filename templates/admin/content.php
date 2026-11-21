@@ -1,5 +1,6 @@
 <?php
-/** @var string $tagline @var string $skyIntro @var string $reelPlaces @var int $reelNight @var ?array $hero @var array $page */
+/** @var string $tagline @var string $skyIntro @var string $reelPlaces @var int $reelNight @var ?array $hero @var array $page @var array $license @var bool $downloads */
+use App\Services\License;
 use App\Services\PresentationImages;
 ?>
 <h1>Contenus</h1>
@@ -29,6 +30,22 @@ use App\Services\PresentationImages;
     <label>Photos de nuit dans le diaporama d'accueil
       <input type="number" name="hero_reel_night" min="0" max="8" value="<?= (int) $reelNight ?>">
       <span class="hint">Reconnues à leur pose longue (une demi-seconde ou plus) ou à un mot comme « nuit », « illuminé » ou « heure bleue » dans le titre ou la légende.</span>
+    </label>
+  </section>
+
+  <section class="panel form">
+    <h2>Photos : licence et téléchargement</h2>
+    <label>Licence des photos
+      <select name="photo_license">
+        <?php foreach (License::ALL as $code => [$label]): ?>
+          <option value="<?= e($code) ?>"<?= $license['code'] === $code ? ' selected' : '' ?>><?= e($label) ?></option>
+        <?php endforeach; ?>
+      </select>
+      <span class="hint">Affichée sous chaque photo (« © 2016 Guillaume Lecomte · … ») et dans les informations de la page. Les licences Creative Commons autorisent la réutilisation en vous citant, selon leurs conditions.</span>
+    </label>
+    <label class="checkbox">
+      <input type="checkbox" name="downloads_enabled" value="1"<?= $downloads ? ' checked' : '' ?>>
+      Proposer le téléchargement des photos (en 1280 pixels, jamais l'original)
     </label>
   </section>
 

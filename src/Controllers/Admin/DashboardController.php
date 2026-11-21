@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Controllers\Admin;
 
 use App\Models\Album;
+use App\Models\Comment;
+use App\Models\Photo;
 use App\Services\Database;
 
 final class DashboardController extends AdminController
@@ -18,6 +20,9 @@ final class DashboardController extends AdminController
                 'photos' => (int) Database::value('SELECT COUNT(*) FROM photos'),
             ],
             'albums' => Album::recentForAdmin(8),
+            'totals' => Photo::totals(),
+            'pendingComments' => Comment::countPending(),
+            'mostViewed' => Photo::popular('vues', 5),
             'limits' => [
                 'upload' => (string) ini_get('upload_max_filesize'),
                 'post' => (string) ini_get('post_max_size'),
