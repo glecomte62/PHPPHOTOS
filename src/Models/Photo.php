@@ -198,6 +198,29 @@ final class Photo
         );
     }
 
+    /**
+     * Chiffres du site pour l'accueil.
+     *
+     * @return array{photos: int, albums: int, themes: int, places: int, from: ?int, to: ?int}
+     */
+    public static function siteStats(): array
+    {
+        $r = Database::one(
+            "SELECT COUNT(*) AS photos, COUNT(DISTINCT a.id) AS albums, COUNT(DISTINCT a.theme_id) AS themes,
+                    COUNT(DISTINCT CASE WHEN p.lat IS NOT NULL THEN CONCAT(ROUND(p.lat, 2), ',', ROUND(p.lng, 2)) END) AS places,
+                    MIN(YEAR(p.taken_at)) AS y1, MAX(YEAR(p.taken_at)) AS y2
+             FROM photos p JOIN albums a ON a.id = p.album_id WHERE a.status = 'published'"
+        ) ?? [];
+        return [
+            'photos' => (int) ($r['photos'] ?? 0),
+            'albums' => (int) ($r['albums'] ?? 0),
+            'themes' => (int) ($r['themes'] ?? 0),
+            'places' => (int) ($r['places'] ?? 0),
+            'from' => isset($r['y1']) ? (int) $r['y1'] : null,
+            'to' => isset($r['y2']) ? (int) $r['y2'] : null,
+        ];
+    }
+
     /** @return array{views: int, likes: int} totaux des albums publiés */
     public static function totals(): array
     {

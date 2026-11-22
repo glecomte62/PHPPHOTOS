@@ -8,6 +8,7 @@
  * @var string $skyIntro
  * @var list<array> $latest
  * @var list<array> $themes
+ * @var array{photos: int, albums: int, themes: int, places: int, from: ?int, to: ?int} $stats
  */
 ?>
 <?php if ($reel): ?>
@@ -28,16 +29,32 @@
 <?php endif; ?>
 
 <section class="intro">
-  <h1 class="visually-hidden">Guillaume Lecomte — Photographe &amp; pilote ULM</h1>
-  <p class="intro__tagline"><?= e($tagline) ?></p>
-  <?= $view->partial('partials/trace') ?>
+  <h1 class="intro__title">Guillaume Lecomte <span>Photographe &amp; pilote ULM</span></h1>
+  <?php $same = static fn (string $s): string => mb_strtolower(trim(str_replace('&amp;', '&', $s))); ?>
+  <?php if ($tagline !== '' && $same($tagline) !== $same('Photographe & pilote ULM')): ?>
+    <p class="intro__tagline"><?= e($tagline) ?></p>
+  <?php endif; ?>
+  <?php if ($stats['photos'] > 0): ?>
+  <ul class="stats" aria-label="Le site en chiffres">
+    <li><a href="/photos"><strong data-count="<?= (int) $stats['photos'] ?>"><?= number_format($stats['photos'], 0, ',', ' ') ?></strong><span>photos</span></a></li>
+    <li><a href="#albums"><strong data-count="<?= (int) $stats['albums'] ?>"><?= (int) $stats['albums'] ?></strong><span>albums</span></a></li>
+    <li><a href="#galeries"><strong data-count="<?= (int) $stats['themes'] ?>"><?= (int) $stats['themes'] ?></strong><span>galeries</span></a></li>
+    <?php if ($stats['places'] > 0): ?>
+    <li><a href="/carte"><strong data-count="<?= (int) $stats['places'] ?>"><?= (int) $stats['places'] ?></strong><span>lieux sur la carte</span></a></li>
+    <?php endif; ?>
+    <?php if ($stats['from'] && $stats['to'] && $stats['to'] > $stats['from']): ?>
+    <li><a href="/photos"><strong data-count="<?= $stats['to'] - $stats['from'] + 1 ?>"><?= $stats['to'] - $stats['from'] + 1 ?></strong><span>ans de photos <small><?= (int) $stats['from'] ?> – <?= (int) $stats['to'] ?></small></span></a></li>
+    <?php endif; ?>
+  </ul>
+  <?php endif; ?>
 </section>
 
 <?php if ($featured): ?>
-<section class="sky" id="galeries">
+<section class="sky">
   <div class="sky__text">
     <p class="eyebrow">Depuis le cockpit</p>
-    <h2 class="section-title"><?= e($featured['title']) ?></h2>
+    <h2 class="section-title section-title--big"><?= e($featured['title']) ?></h2>
+    <p class="sky__count"><?= (int) $featured['published_albums'] ?> album<?= (int) $featured['published_albums'] > 1 ? 's' : '' ?> · <?= (int) ($featured['published_photos'] ?? 0) ?> photos</p>
     <?php if ($skyIntro !== ''): ?><p><?= nl2br(e($skyIntro)) ?></p><?php endif; ?>
     <a class="link-arrow" href="/<?= e($featured['slug']) ?>">Voir la galerie</a>
   </div>
@@ -52,26 +69,41 @@
 <?php endif; ?>
 
 <?php if ($latest): ?>
-<section class="section">
-  <h2 class="section-title">Derniers albums</h2>
-  <div class="card-grid">
+<section class="section" id="albums">
+  <header class="section-head">
+    <div>
+      <p class="eyebrow">Nouveautés</p>
+      <h2 class="section-title section-title--big">Derniers albums</h2>
+    </div>
+    <a class="link-arrow" href="/photos">Toutes les photos</a>
+  </header>
+  <div class="card-grid card-grid--home">
     <?php foreach ($latest as $album): ?>
-      <?= $view->partial('partials/album-card', ['album' => $album]) ?>
+      <?= $view->partial('partials/album-card', ['album' => $album, 'variant' => 'overlay']) ?>
     <?php endforeach; ?>
   </div>
 </section>
 <?php endif; ?>
 
 <?php if ($themes): ?>
-<section class="section"<?= $featured ? '' : ' id="galeries"' ?>>
-  <h2 class="section-title">Galeries</h2>
+<section class="section" id="galeries">
+  <header class="section-head">
+    <div>
+      <p class="eyebrow">Explorer</p>
+      <h2 class="section-title section-title--big">Galeries</h2>
+    </div>
+    <a class="link-arrow" href="/carte">Voir la carte</a>
+  </header>
   <div class="theme-grid">
     <?php foreach ($themes as $theme): ?>
       <a class="theme-card" href="/<?= e($theme['slug']) ?>">
         <?php if (!empty($theme['cover_key'])): ?>
           <?= $view->partial('partials/picture', ['key' => $theme['cover_key'], 'alt' => '', 'sizes' => '(min-width: 900px) 45vw, 100vw']) ?>
         <?php endif; ?>
-        <span class="theme-card__title"><?= e($theme['title']) ?></span>
+        <span class="theme-card__over">
+          <span class="theme-card__title"><?= e($theme['title']) ?></span>
+          <span class="theme-card__count"><?= (int) $theme['published_albums'] ?> album<?= (int) $theme['published_albums'] > 1 ? 's' : '' ?> · <?= (int) $theme['published_photos'] ?> photos</span>
+        </span>
       </a>
     <?php endforeach; ?>
   </div>

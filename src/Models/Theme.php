@@ -17,7 +17,8 @@ final class Theme
             ORDER BY a.position, a.id, p.position, p.id LIMIT 1)
         ) AS cover_key,
         (SELECT COUNT(*) FROM albums a WHERE a.theme_id = t.id AND a.status = 'published') AS published_albums,
-        (SELECT COUNT(*) FROM albums a WHERE a.theme_id = t.id) AS total_albums
+        (SELECT COUNT(*) FROM albums a WHERE a.theme_id = t.id) AS total_albums,
+        (SELECT COUNT(*) FROM photos p JOIN albums a ON a.id = p.album_id WHERE a.theme_id = t.id AND a.status = 'published') AS published_photos
         FROM themes t";
 
     /** @return list<array<string, mixed>> */

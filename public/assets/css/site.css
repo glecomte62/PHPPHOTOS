@@ -143,8 +143,47 @@ a { color: inherit; }
   .hero--reel .hero__img { animation: none !important; }
   .hero__slide { transition-duration: .01s; }
 }
-.intro { padding: 40px var(--gutter) 0; text-align: center; }
-.intro__tagline { margin: 0; font-family: var(--serif); font-style: italic; font-size: clamp(1.4rem, 3vw, 2rem); }
+.intro { max-width: var(--max); margin: 0 auto; padding: clamp(48px, 7vw, 88px) var(--gutter) 0; text-align: center; }
+.intro__title {
+  margin: 0; font-family: var(--serif); font-weight: 500; font-size: clamp(2.6rem, 6.5vw, 4.8rem); line-height: 1.02; letter-spacing: -.01em;
+}
+.intro__title span {
+  display: block; margin-top: 14px; font-family: var(--sans); font-weight: 500; font-size: clamp(.72rem, 1.1vw, .84rem);
+  letter-spacing: .32em; text-transform: uppercase; color: var(--muted);
+}
+.intro__tagline { max-width: 34em; margin: 22px auto 0; font-family: var(--serif); font-style: italic; font-size: clamp(1.25rem, 2.4vw, 1.7rem); color: var(--ink); }
+
+/* Compteurs */
+.stats {
+  display: flex; flex-wrap: wrap; justify-content: center; margin: clamp(36px, 5vw, 56px) auto 0; padding: 0; list-style: none;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.stats li { flex: 1 1 150px; max-width: 240px; }
+.stats li + li { border-left: 1px solid var(--line); }
+.stats a { display: block; padding: 22px 12px 20px; text-decoration: none; transition: background .2s; }
+.stats a:hover { background: var(--paper-deep); }
+.stats strong {
+  display: block; font-family: var(--serif); font-weight: 500; font-size: clamp(2.2rem, 4.6vw, 3.4rem); line-height: 1;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.stats span { display: block; margin-top: 8px; font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+.stats small { display: block; margin-top: 4px; font-size: .7rem; letter-spacing: .06em; }
+@media (max-width: 640px) {
+  .stats li { flex-basis: 50%; max-width: none; border-left: 0 !important; }
+  .stats li:nth-child(even) { border-left: 1px solid var(--line) !important; }
+  .stats li:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .stats li:last-child:nth-child(odd) { flex-basis: 100%; }
+}
+
+/* Titres de section mis en valeur */
+.section-title--big { font-size: clamp(2.4rem, 5vw, 3.8rem); line-height: 1.05; }
+.section-head {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px;
+  margin-bottom: 32px; padding-bottom: 18px; border-bottom: 1px solid var(--ink);
+}
+.section-head .section-title { margin: 0; }
+.section-head .eyebrow { margin-bottom: 6px; }
+.sky__count { margin: -12px 0 18px; font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; color: var(--muted) !important; }
 .sky {
   display: grid; grid-template-columns: minmax(260px, 1fr) 2fr; gap: clamp(28px, 5vw, 64px); align-items: center;
   max-width: var(--max); margin: 0 auto; padding: clamp(56px, 9vw, 110px) var(--gutter) 0;
@@ -168,10 +207,31 @@ a { color: inherit; }
 .album-card__meta { margin: 0; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr)); gap: 28px; }
 .theme-card { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; background: var(--paper-deep); text-decoration: none; }
-.theme-card__title {
-  position: absolute; left: 0; bottom: 0; padding: 10px 22px 6px 0; background: var(--paper);
-  font-family: var(--serif); font-style: italic; font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+.theme-card__over {
+  position: absolute; inset: auto 0 0 0; display: block; padding: 70px 26px 22px; color: #fff;
+  background: linear-gradient(to top, rgba(12, 12, 11, .82), rgba(12, 12, 11, .45) 55%, transparent);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, .45);
 }
+.theme-card__title { display: block; font-family: var(--serif); font-weight: 500; font-size: clamp(1.9rem, 3.4vw, 2.8rem); line-height: 1.05; }
+.theme-card__count { display: block; margin-top: 8px; font-size: .74rem; letter-spacing: .18em; text-transform: uppercase; opacity: .88; }
+
+/* Cartes d'album : nombre de photos, variante avec le titre sur la photo */
+.album-card__img { position: relative; }
+.album-card__count {
+  position: absolute; top: 12px; right: 12px; z-index: 1; padding: 4px 10px; border-radius: 999px;
+  background: rgba(12, 12, 11, .6); color: #fff; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.card-grid--home { grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 22px; }
+.album-card--overlay .album-card__img { aspect-ratio: 4 / 3; }
+.album-card__over {
+  position: absolute; inset: auto 0 0 0; display: block; padding: 60px 20px 18px; color: #fff;
+  background: linear-gradient(to top, rgba(12, 12, 11, .85), rgba(12, 12, 11, .45) 55%, transparent);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, .45);
+}
+.album-card--overlay .album-card__title { display: block; margin: 0; font-family: var(--serif); font-style: normal; font-weight: 500; font-size: clamp(1.6rem, 2.4vw, 2rem); line-height: 1.1; }
+.album-card--overlay .album-card__meta { display: block; margin-top: 6px; color: rgba(255, 255, 255, .85); }
+.album-card__theme { display: block; margin-bottom: 6px; font-size: .68rem; letter-spacing: .22em; text-transform: uppercase; opacity: .85; }
 
 /* Mosaïque d'album (rangées justifiées par mosaic.js, grille simple sans JS) */
 .mosaic {
