@@ -20,6 +20,13 @@
   root.setAttribute('aria-modal', 'true');
   root.setAttribute('aria-label', 'Visionneuse de photos');
   root.innerHTML = `
+    <nav class="viewer__path" aria-label="Fil d'Ariane">
+      <a class="viewer__path-home" href="/">Accueil</a><span class="viewer__path-sep viewer__path-home" aria-hidden="true">›</span>
+      <a class="viewer__path-theme" href="/"></a><span class="viewer__path-sep viewer__path-theme" aria-hidden="true">›</span>
+      <a class="viewer__path-album" href="#"></a><span class="viewer__path-sep" aria-hidden="true">›</span>
+      <span class="viewer__path-photo" aria-current="page"></span>
+      <span class="viewer__path-count"></span>
+    </nav>
     <button class="viewer__btn viewer__close" type="button" aria-label="Fermer">×</button>
     <button class="viewer__btn viewer__info-toggle" type="button" aria-label="Informations sur la photo" aria-expanded="false">i</button>
     <button class="viewer__btn viewer__play" type="button" aria-label="Lancer le diaporama" aria-pressed="false">
@@ -533,6 +540,8 @@
     img.src = hiRes ? p.jpg : p.jpgM;
     img.alt = p.title || '';
     $('.viewer__caption').textContent = p.title || '';
+    $('.viewer__path-photo').textContent = p.title || `Photo ${index + 1}`;
+    $('.viewer__path-count').textContent = `${index + 1} / ${photos.length}`;
     $('.viewer__title').textContent = p.title || '';
     $('.viewer__text').textContent = p.caption || '';
     const dl = $('.viewer__exif');
@@ -634,6 +643,20 @@
     open(parseInt(a.dataset.index, 10));
   }));
   $('.viewer__close').addEventListener('click', close);
+
+  // Fil d'Ariane : Accueil › Thème › Album › Photo
+  const path = data.path || {};
+  const themeLink = $('.viewer__path-theme');
+  themeLink.textContent = path.theme || '';
+  themeLink.href = path.themeUrl || '/';
+  const albumLink = $('.viewer__path-album');
+  albumLink.textContent = path.album || albumName;
+  albumLink.href = data.base;
+  albumLink.addEventListener('click', (ev) => {
+    if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return;
+    ev.preventDefault();
+    close(); // l'album est déjà là, sous la visionneuse
+  });
   $('.viewer__prev').addEventListener('click', () => go(-1));
   $('.viewer__next').addEventListener('click', () => go(1));
   toggle.addEventListener('click', () => {

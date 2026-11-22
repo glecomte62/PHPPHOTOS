@@ -112,12 +112,21 @@ final class PublicController extends Controller
                 'type' => 'article',
                 'jsonld' => [
                     '@context' => 'https://schema.org',
-                    '@type' => 'ImageGallery',
-                    'name' => $a['title'],
-                    'url' => absolute_url($base),
-                    'author' => ['@type' => 'Person', 'name' => License::AUTHOR],
-                    'copyrightHolder' => ['@type' => 'Person', 'name' => License::AUTHOR],
-                ] + ($license['url'] ? ['license' => $license['url']] : []),
+                    '@graph' => [
+                        [
+                            '@type' => 'ImageGallery',
+                            'name' => $a['title'],
+                            'url' => absolute_url($base),
+                            'author' => ['@type' => 'Person', 'name' => License::AUTHOR],
+                            'copyrightHolder' => ['@type' => 'Person', 'name' => License::AUTHOR],
+                        ] + ($license['url'] ? ['license' => $license['url']] : []),
+                        self::breadcrumb(array_filter([
+                            'Accueil' => '/',
+                            (string) $a['theme_title'] => '/' . $a['theme_slug'],
+                            (string) $a['title'] => $base,
+                        ] + ($current ? [photo_label((string) $current['title'], 'Photo') => $base . '/photo/' . (int) $current['id']] : []))),
+                    ],
+                ],
             ],
             'album' => $a,
             'photos' => $photos,
@@ -129,6 +138,21 @@ final class PublicController extends Controller
             'styles' => self::leafletCss(),
             'scripts' => [self::leafletJs(), asset('js/mosaic.js'), asset('js/viewer.js')],
         ]);
+    }
+
+    /**
+     * Fil d'Ariane pour les moteurs de recherche (schema.org BreadcrumbList).
+     *
+     * @param array<string, string> $items libellé => chemin
+     * @return array<string, mixed>
+     */
+    private static function breadcrumb(array $items): array
+    {
+        $list = [];
+        foreach ($items as $name => $path) {
+            $list[] = ['@type' => 'ListItem', 'position' => count($list) + 1, 'name' => (string) $name, 'item' => absolute_url($path)];
+        }
+        return ['@type' => 'BreadcrumbList', 'itemListElement' => $list];
     }
 
     /**

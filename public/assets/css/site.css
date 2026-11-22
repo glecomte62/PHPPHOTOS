@@ -271,6 +271,30 @@ html:has(body.viewer-open) { scrollbar-gutter: auto; }
 .viewer.is-immersive .viewer__fullscreen .icon-shrink { display: block; }
 .viewer.is-zoomed .viewer__zoom .zoom-plus { display: none; }
 
+/* Fil d'Ariane de la visionneuse */
+.viewer__path {
+  position: absolute; top: 22px; left: 24px; z-index: 2; display: flex; align-items: baseline; gap: 8px;
+  max-width: calc(100% - 300px); font-size: .78rem; letter-spacing: .06em; color: var(--muted); white-space: nowrap;
+}
+.viewer:has(.viewer__info:not([hidden])) .viewer__path { max-width: calc(100% - 640px); }
+.viewer__path a { color: inherit; text-decoration: none; border-bottom: 1px solid transparent; overflow: hidden; text-overflow: ellipsis; }
+.viewer__path a:hover { color: var(--ink); border-color: var(--ink); }
+.viewer__path-album { color: var(--ink) !important; }
+.viewer__path-photo { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+.viewer__path-count { flex: none; padding-left: 6px; font-variant-numeric: tabular-nums; }
+.viewer.is-zoomed .viewer__path { visibility: hidden; }
+.viewer.is-immersive .viewer__path { color: rgba(255, 255, 255, .75); text-shadow: 0 1px 3px rgba(0, 0, 0, .7); }
+.viewer.is-immersive .viewer__path-album, .viewer.is-immersive .viewer__path-photo { color: #fff !important; }
+.viewer.is-immersive .viewer__path a:hover { color: #fff; border-color: #fff; }
+@media (max-width: 1000px) {
+  .viewer__path .viewer__path-home { display: none; }
+}
+@media (max-width: 760px) {
+  /* Sur téléphone : Album › 3 / 17, sous les boutons */
+  .viewer__path { top: 62px; left: 12px; right: 12px; max-width: none; justify-content: center; }
+  .viewer__path .viewer__path-theme, .viewer__path-photo, .viewer__path-album + .viewer__path-sep { display: none; }
+}
+
 /* Zoom */
 .viewer__stage img { position: relative; z-index: 1; touch-action: none; cursor: zoom-in; user-select: none; -webkit-user-drag: none; }
 .viewer.is-zoomed .viewer__stage { overflow: hidden; }

@@ -34,6 +34,7 @@
 </section>
 
 <script type="application/json" id="viewer-data"><?= json_encode(
-    ['base' => $baseUrl, 'open' => $openIndex, 'photos' => $viewerPhotos, 'ts' => $commentToken],
+    ['base' => $baseUrl, 'open' => $openIndex, 'photos' => $viewerPhotos, 'ts' => $commentToken,
+     'path' => ['theme' => $album['theme_title'], 'themeUrl' => '/' . $album['theme_slug'], 'album' => $album['title']]],
     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_INVALID_UTF8_SUBSTITUTE
 ) ?></script>
