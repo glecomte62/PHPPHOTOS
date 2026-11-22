@@ -56,7 +56,7 @@ abstract class Controller
                 [$slug]
             );
             return $row ? '/' . $row['theme'] . '/' . $row['album'] : null;
-        });
+        }, (string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_QUERY));
         if ($target !== null && $target !== '/' . trim($path, '/')) {
             header('Cache-Control: public, max-age=86400');
             redirect($target, 301);
