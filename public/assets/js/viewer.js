@@ -73,6 +73,7 @@
       <dl class="viewer__exif"></dl>
       <a class="button viewer__contact-button" href="/contact">Me contacter pour cette photo</a>
       <div class="viewer__map" hidden></div>
+      <a class="viewer__map-link" href="/carte" hidden>Voir sur la grande carte →</a>
       <section class="viewer__nearby" hidden>
         <h3 class="viewer__subtitle">À proximité</h3>
         <ul></ul>
@@ -99,25 +100,42 @@
   const info = $('.viewer__info');
   const toggle = $('.viewer__info-toggle');
   const mapBox = $('.viewer__map');
+  const mapLink = $('.viewer__map-link');
   const large = () => window.innerWidth * (window.devicePixelRatio || 1) > 1400;
   const urlFor = (i) => `${data.base}/photo/${photos[i].id}`;
 
   const updateMap = (p) => {
     const hasGps = p.lat !== null && p.lng !== null;
     mapBox.hidden = !hasGps || !window.L;
+    mapLink.hidden = mapBox.hidden;
     if (!hasGps || info.hidden || !window.L) return;
     if (!miniMap) {
-      miniMap = L.map(mapBox, { scrollWheelZoom: false });
-      // Fond gris + couche des noms de lieux (villes, routes, côtes), comme sur la grande carte
-      const esri = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
-      L.tileLayer(`${esri}World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {
-        attribution: '© Esri, © OpenStreetMap', maxZoom: 16,
-      }).addTo(miniMap);
-      L.tileLayer(`${esri}World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, { maxZoom: 16 }).addTo(miniMap);
-      marker = L.circleMarker([p.lat, p.lng], { radius: 7, color: '#1b1b1a', weight: 2, fillColor: '#f4f1ec', fillOpacity: 1 }).addTo(miniMap);
+      miniMap = L.map(mapBox, { scrollWheelZoom: false, zoomSnap: 0.5 });
+      if (window.GLMap) {
+        window.GLMap.baseLayers(miniMap, { control: false });
+        miniMap.attributionControl.setPrefix(false);
+      } else {
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+          attribution: '© Esri, © OpenStreetMap', maxZoom: 16,
+        }).addTo(miniMap);
+      }
+      // Les autres photos de l'album, en petits points cliquables
+      photos.forEach((q, i) => {
+        if (q.lat === null || q.lng === null) return;
+        L.circleMarker([q.lat, q.lng], { radius: 4, color: '#1b1b1a', weight: 1, fillColor: '#f4f1ec', fillOpacity: 0.9 })
+          .bindTooltip(q.title || '', { direction: 'top' })
+          .on('click', () => go(i - index))
+          .addTo(miniMap);
+      });
+      marker = window.GLMap
+        ? L.marker([p.lat, p.lng], { icon: window.GLMap.photoIcon(p.thumb, { size: 46, active: true }), zIndexOffset: 1000, interactive: false })
+        : L.circleMarker([p.lat, p.lng], { radius: 7, color: '#1b1b1a', weight: 2, fillColor: '#f4f1ec', fillOpacity: 1 });
+      marker.addTo(miniMap);
     }
     marker.setLatLng([p.lat, p.lng]);
-    miniMap.setView([p.lat, p.lng], 11);
+    if (window.GLMap && marker.setIcon) marker.setIcon(window.GLMap.photoIcon(p.thumb, { size: 46, active: true }));
+    miniMap.setView([p.lat, p.lng], Math.max(miniMap.getZoom() || 0, 13));
+    mapLink.href = `/carte?photo=${p.id}`;
     setTimeout(() => miniMap.invalidateSize(), 50);
   };
 

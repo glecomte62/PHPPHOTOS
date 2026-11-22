@@ -11,7 +11,7 @@ use App\Services\SearchQuery;
 final class Photo
 {
     private const SELECT = 'SELECT p.*, a.slug AS album_slug, a.title AS album_title, a.status AS album_status, a.location AS album_location,
-        a.theme_id, t.slug AS theme_slug
+        a.theme_id, t.slug AS theme_slug, t.title AS theme_title
         FROM photos p JOIN albums a ON a.id = p.album_id JOIN themes t ON t.id = a.theme_id';
 
     private const EDITABLE = ['title', 'caption', 'lat', 'lng'];
@@ -93,7 +93,7 @@ final class Photo
     /** Photos géolocalisées des albums publiés. @return list<array<string, mixed>> */
     public static function geotagged(): array
     {
-        return Database::all(self::SELECT . " WHERE a.status = 'published' AND p.lat IS NOT NULL AND p.lng IS NOT NULL ORDER BY p.id");
+        return Database::all(self::SELECT . " WHERE a.status = 'published' AND p.lat IS NOT NULL AND p.lng IS NOT NULL ORDER BY t.position, a.position, p.position, p.id");
     }
 
     /**

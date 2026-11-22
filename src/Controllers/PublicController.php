@@ -135,8 +135,8 @@ final class PublicController extends Controller
             'viewerPhotos' => array_map(static fn (array $p): array => self::viewerPhoto($p, $license, $downloads), $photos),
             // Jeton horodaté du formulaire de commentaire (anti-robots, comme le formulaire de contact)
             'commentToken' => ContactForm::token((string) Env::get('APP_KEY', ''), time()),
-            'styles' => self::leafletCss(),
-            'scripts' => [self::leafletJs(), asset('js/mosaic.js'), asset('js/viewer.js')],
+            'styles' => [...self::leafletCss(), ...self::clusterCss()],
+            'scripts' => [self::leafletJs(), self::clusterJs(), asset('js/map-common.js'), asset('js/mosaic.js'), asset('js/viewer.js'), asset('js/album-map.js')],
         ]);
     }
 
@@ -184,6 +184,7 @@ final class PublicController extends Controller
             'iso' => $p['iso'] !== null ? (string) $p['iso'] : null,
             'lat' => $p['lat'] !== null ? (float) $p['lat'] : null,
             'lng' => $p['lng'] !== null ? (float) $p['lng'] : null,
+            'thumb' => media_url($key, 480),
         ];
     }
 
@@ -192,7 +193,7 @@ final class PublicController extends Controller
         $this->render('public/map', [
             'meta' => ['title' => 'Carte des photos', 'description' => 'Les lieux de mes photos sur une carte : paysages, villes et vues du ciel.'],
             'styles' => [...self::leafletCss(), ...self::clusterCss()],
-            'scripts' => [self::leafletJs(), self::clusterJs(), asset('js/map.js')],
+            'scripts' => [self::leafletJs(), self::clusterJs(), asset('js/map-common.js'), asset('js/map.js')],
         ]);
     }
 
@@ -200,10 +201,16 @@ final class PublicController extends Controller
     {
         header('Cache-Control: public, max-age=300');
         json_response(array_map(static fn (array $p): array => [
-            'lat' => (float) $p['lat'],
-            'lng' => (float) $p['lng'],
-            'title' => (string) $p['title'],
+            'id' => (int) $p['id'],
+            'lat' => round((float) $p['lat'], 6),
+            'lng' => round((float) $p['lng'], 6),
+            'title' => photo_label((string) $p['title'], (string) $p['album_title']),
             'album' => (string) $p['album_title'],
+            'albumUrl' => '/' . $p['theme_slug'] . '/' . $p['album_slug'],
+            'albumKey' => $p['theme_slug'] . '/' . $p['album_slug'],
+            'theme' => (string) $p['theme_slug'],
+            'themeTitle' => (string) $p['theme_title'],
+            'taken' => $p['taken_at'] ? format_date_fr((string) $p['taken_at']) : null,
             'thumb' => media_url((string) $p['file_key'], 480),
             'url' => '/' . $p['theme_slug'] . '/' . $p['album_slug'] . '/photo/' . $p['id'],
         ], Photo::geotagged()));

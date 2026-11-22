@@ -33,6 +33,16 @@
   <?php endforeach; ?>
 </section>
 
+<?php $geo = count(array_filter($photos, static fn (array $p): bool => $p['lat'] !== null && $p['lng'] !== null)); ?>
+<?php if ($geo > 0): ?>
+<section class="section album-map">
+  <h2 class="section-title">Où ont été prises ces photos</h2>
+  <div class="album-map__map" data-album-map role="region" aria-label="Carte des photos de l'album"></div>
+  <p class="album-map__more"><?= $geo ?> photo<?= $geo > 1 ? 's' : '' ?> sur <?= count($photos) ?> sont situées.
+    <a class="link-arrow" href="/carte?album=<?= e(rawurlencode($album['theme_slug']) . '/' . rawurlencode($album['slug'])) ?>">Voir sur la grande carte</a></p>
+</section>
+<?php endif; ?>
+
 <script type="application/json" id="viewer-data"><?= json_encode(
     ['base' => $baseUrl, 'open' => $openIndex, 'photos' => $viewerPhotos, 'ts' => $commentToken,
      'path' => ['theme' => $album['theme_title'], 'themeUrl' => '/' . $album['theme_slug'], 'album' => $album['title']]],
