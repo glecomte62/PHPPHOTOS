@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Services\Database;
+use App\Services\LegacyRedirect;
 use App\Services\View;
 
 abstract class Controller
@@ -40,8 +42,30 @@ abstract class Controller
         echo $this->view->render($template, $data);
     }
 
+    /** Ancienne adresse de l'ancien site : redirection permanente vers la page équivalente. */
+    public static function redirectLegacy(): void
+    {
+        if (!in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'HEAD'], true)) {
+            return;
+        }
+        $path = rawurldecode((string) (parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/'));
+        $target = LegacyRedirect::resolve($path, static function (string $slug): ?string {
+            $row = Database::one(
+                "SELECT t.slug AS theme, a.slug AS album FROM albums a JOIN themes t ON t.id = a.theme_id
+                 WHERE a.slug = ? AND a.status = 'published' LIMIT 1",
+                [$slug]
+            );
+            return $row ? '/' . $row['theme'] . '/' . $row['album'] : null;
+        });
+        if ($target !== null && $target !== '/' . trim($path, '/')) {
+            header('Cache-Control: public, max-age=86400');
+            redirect($target, 301);
+        }
+    }
+
     protected function notFound(): void
     {
+        self::redirectLegacy();
         $this->render('public/error', ['meta' => ['title' => 'Page introuvable'], 'code' => 404, 'message' => 'Cette page n\'existe pas ou plus.'], 404);
     }
 }

@@ -41,6 +41,7 @@ set_exception_handler(static function (\Throwable $e) use ($view): void {
 $router = require ROOT . '/src/routes.php';
 
 $router->dispatch($_SERVER['REQUEST_METHOD'] ?? 'GET', $_SERVER['REQUEST_URI'] ?? '/', static function () use ($view): void {
+    App\Controllers\Controller::redirectLegacy();
     http_response_code(404);
     echo $view->render('public/error', ['meta' => ['title' => 'Page introuvable'], 'code' => 404, 'message' => 'Cette page n\'existe pas ou plus.']);
 });
