@@ -23,6 +23,10 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} ^(.+)/$
 RewriteRule ^ %1 [R=301,L]
 
+# Adresses demandées d'office par les navigateurs et les robots
+RewriteRule ^apple-touch-icon-precomposed\.png$ apple-touch-icon.png [L]
+RewriteRule ^sitemap_index\.xml$ /sitemap.xml [R=301,L]
+
 # Tout ce qui n'est pas un fichier existant passe par index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ index.php [L,QSA]
